@@ -1,7 +1,8 @@
 #include "winapi.hpp"
-#include "utility.hpp"
+#include "../macros/utility.hpp"
+#include "../macros/global.hpp"
 
-WinAPI::Process::Enums::ReturnCode WinAPI::Process::getProcesses(WinAPI::Process::Types::mapProcessList& plist) {    
+void WinAPI::Process::getProcesses(WinAPI::Process::Types::mapProcessList& plist) {    
     HANDLE hProcessSnap = NULL;
     HANDLE hProcess = NULL;
     PROCESSENTRY32 pe32;
@@ -9,21 +10,19 @@ WinAPI::Process::Enums::ReturnCode WinAPI::Process::getProcesses(WinAPI::Process
 
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) 
-        return WinAPI::Process::Enums::ReturnCode(WinAPI::Process::Constants::Returns::HANDLE_ACQUIRE_FAILED |
-            Exception::Constants::RTN_EXIT_FAILED);
+        //TODO
     pe32.dwSize = sizeof(PROCESSENTRY32);
 
     if (!Process32First(hProcessSnap, &pe32)) {
         CloseHandle(hProcessSnap);
-        return WinAPI::Process::Enums::ReturnCode(WinAPI::Process::Constants::Returns::PROCESS32FIRSTERROR |
-            Exception::Constants::RTN_EXIT_FAILED);;
+        return; // TODO
     }
 
     // Skip System, Registry
     Process32Next(hProcessSnap, &pe32);
     if (hProcess == INVALID_HANDLE_VALUE) {
         CloseHandle(hProcessSnap);
-        return WinAPI::Process::Enums::ReturnCode(WinAPI::Process::Constants::Returns::HANDLE_ACQUIRE_FAILED | Exception::Constants::RTN_EXIT_FAILED);
+        return; // TODO
     }
     Process32Next(hProcessSnap, &pe32);
     Process32Next(hProcessSnap, &pe32);
@@ -38,27 +37,26 @@ WinAPI::Process::Enums::ReturnCode WinAPI::Process::getProcesses(WinAPI::Process
 
     CloseHandle(hProcessSnap);
 
-    return WinAPI::Process::Enums::ReturnCode(Exception::Constants::RTN_EXIT_SUCCESS);
+    return; // TODO
 }
 
-WinAPI::Process::Enums::ReturnCode WinAPI::Process::getPathProcess(std::filesystem::path& pathProc, const unsigned int& nPID){
+void WinAPI::Process::getPathProcess(std::filesystem::path& pathProc, const unsigned int& nPID){
     DWORD PID = nPID;
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, PID);
 
     DWORD value = MAX_PATH;
-    ENCODING_TYPE buffer[MAX_PATH];
+    CHAR buffer[MAX_PATH];
     if (!QueryFullProcessImageName(hProcess, 0, buffer, &value))
-        return WinAPI::Process::Enums::ReturnCode(WinAPI::Process::Constants::Returns::QUERY_PROCESS_IMAGE_FAILED |
-            Exception::Constants::RTN_EXIT_FAILED);
+        return; // TODO
     pathProc = buffer;
 
-    return WinAPI::Process::Enums::ReturnCode(Exception::Constants::RTN_EXIT_SUCCESS);
+    return; // TODO
 }
 
 std::string WinAPI::Process::Utility::getErrorMessage(unsigned short code) {
     std::string errstr = "Error : ";
 
-    code = code ^ Exception::Constants::RTN_EXIT_FAILED;
+    //code = code ^ Exception::Constants::RTN_EXIT_FAILED;
     switch (code) {
     case Constants::Returns::HANDLE_ACQUIRE_FAILED:
         errstr.insert(errstr.back(), Constants::STR_ERR_HANDLE_ACQUIRE_FAILED);
