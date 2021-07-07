@@ -11,8 +11,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "unicode.hpp"
-#include "exception.hpp"
+#include "global.hpp"
 
 namespace WinAPI {
 	namespace Process {
@@ -39,14 +38,11 @@ namespace WinAPI {
 			}
 		}
 
-		namespace Enums {
-			using ReturnCode = Exception::baseReturn;
-		}
-
 		namespace Utility {
 			std::string getErrorMessage(unsigned short code);
 		}
-
+		// TODO: Refactor to Exception
+		
 		Process::Enums::ReturnCode getProcesses(Process::Types::mapProcessList&);
 		Process::Enums::ReturnCode getPathProcess(std::filesystem::path&, const unsigned int&);
 	}

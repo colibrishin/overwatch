@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b7588a23-3ed6-4d7f-9b42-35b214543bbc}</ProjectGuid>
+    <ProjectGuid>{aefd011d-db9e-4eb4-9f04-19bbe5d7200e}</ProjectGuid>
     <RootNamespace>overwatch</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -88,6 +88,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,25 +141,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="data\data.hpp" />
-    <ClInclude Include="data\loader.hpp" />
-    <ClInclude Include="data\models.hpp" />
-    <ClInclude Include="exception_class.hpp" />
-    <ClInclude Include="filesystem\fs.hpp" />
-    <ClInclude Include="hash\hash.hpp" />
-    <ClInclude Include="hash\sha256.h" />
-    <ClInclude Include="io\reader.hpp" />
-    <ClInclude Include="macros\global.hpp" />
-    <ClInclude Include="macros\utility.hpp" />
-    <ClInclude Include="win\winapi.hpp" />
+    <ClCompile Include="database.cpp" />
+    <ClCompile Include="hash.cpp" />
+    <ClCompile Include="menu.cpp" />
+    <ClCompile Include="overwatch.cpp" />
+    <ClCompile Include="sha256.cpp" />
+    <ClCompile Include="utility.cpp" />
+    <ClCompile Include="winapi.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="filesystem\fs.cpp" />
-    <ClCompile Include="hash\hash.cpp" />
-    <ClCompile Include="hash\sha256.cpp" />
-    <ClCompile Include="io\reader.cpp" />
-    <ClCompile Include="macros\utility.cpp" />
-    <ClCompile Include="win\winapi.cpp" />
+    <ClInclude Include="database.hpp" />
+    <ClInclude Include="exception.hpp" />
+    <ClInclude Include="hash.hpp" />
+    <ClInclude Include="menu.hpp" />
+    <ClInclude Include="overwatch.hpp" />
+    <ClInclude Include="sha256.h" />
+    <ClInclude Include="types.hpp" />
+    <ClInclude Include="unicode.hpp" />
+    <ClInclude Include="utility.hpp" />
+    <ClInclude Include="winapi.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

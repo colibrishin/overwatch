@@ -1,5 +1,6 @@
 #include "winapi.hpp"
 #include "utility.hpp"
+#include "global.hpp"
 
 WinAPI::Process::Enums::ReturnCode WinAPI::Process::getProcesses(WinAPI::Process::Types::mapProcessList& plist) {    
     HANDLE hProcessSnap = NULL;
