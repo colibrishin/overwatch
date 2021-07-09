@@ -15,12 +15,15 @@ namespace Utility {
 	}
 }
 
+#define _WMEMNULLCPY(x,y,z) Utility::_String::_wcharNULLbreakCopy(x, y, z)
+#define _MEMNULLCPY(x,y,z) Utility::_String::_charNULLbreakCopy(x, y, z)
+
 #ifdef UNICODE
-#define MEMNULLCPY(x, y, z) Utility::_String::_wcharNULLbreakCopy(x, y, z)
+#define MEMNULLCPY(x, y, z) _WMEMNULLCPY(x,y,z)
 #define ISNUMBER(x) Utility::_String::_isWNumber(x)
 #define STREMPTY(x) Utility::_String::_isWStrEmpty(x)
 #else
-#define MEMNULLCPY(x, y, z) Utility::_String::_charNULLbreakCopy(x, y, z)
+#define MEMNULLCPY(x, y, z) _MEMNULLCPY(x,y,z)
 #define ISNUMBER(x) Utility::_String::isNumber(x)
 #define STREMPTY(x) Utility::_String::_isStrEmpty(x)
 #endif

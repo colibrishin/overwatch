@@ -11,6 +11,11 @@
 #include "../exception_class.hpp"
 
 namespace Data {
+
+	const static unsigned char MAX_SNAPSHOTS_IN_MAP = UCHAR_MAX;
+	using T_SNAPSHOT_SIZE_IN_MAP = unsigned char;
+
+
 	namespace Structures{
 		typedef struct Game {
 			strNameT nameGame;
@@ -28,11 +33,11 @@ namespace Data {
 			}
 			
 			void _CLEAR() {
-				MEMSET(nameGame, NULL, sizeof(nameGame));
-				MEMSET(nameProc, NULL, sizeof(nameProc));
-				MEMSET(pathGame, NULL, sizeof(pathGame));
-				MEMSET(pathSave, NULL, sizeof(pathSave));
-				MEMSET(strExtenison, NULL, sizeof(strExtenison));
+				MEMSET(nameGame, NULL_CHAR, sizeof(nameGame));
+				MEMSET(nameProc, NULL_CHAR, sizeof(nameProc));
+				MEMSET(pathGame, NULL_CHAR, sizeof(pathGame));
+				MEMSET(pathSave, NULL_CHAR, sizeof(pathSave));
+				MEMSET(strExtenison, NULL_CHAR, sizeof(strExtenison));
 			}
 
 			Game() { _CLEAR(); }
@@ -44,15 +49,59 @@ namespace Data {
 		} Game;
 
 		typedef struct Snapshot {
-			
-		};
+			Hash::SHA256 hashGame;
+			Hash::SHA256 hashSnapshot;
+			std::time_t dateAdded;
+			strNameT nameSave;
+			strPathT pathSave;
 
-		typedef struct MiniSnapshot{
+			void _COPY(const Snapshot& _ref) {
+				_MEMNULLCPY(this->hashGame, _ref.hashGame, sizeof(this->hashGame));
+				_MEMNULLCPY(this->hashSnapshot, _ref.hashSnapshot, sizeof(this->hashSnapshot));
+				this->dateAdded = _ref.dateAdded;
+				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(this->nameSave));
+				MEMNULLCPY(this->pathSave, _ref.pathSave, sizeof(this->pathSave));
+			}
 
+			void _CLEAR() {
+				_MEMSET(this->hashGame, '\0', sizeof(this->hashGame));
+				_MEMSET(this->hashSnapshot, '\0', sizeof(this->hashSnapshot));
+				this->dateAdded = 0;
+				MEMSET(this->nameSave, NULL_CHAR, sizeof(this->nameSave));
+				MEMSET(this->pathSave, NULL_CHAR, sizeof(this->pathSave));
+			}
+
+			Snapshot() { _CLEAR(); }
+			Snapshot(const Snapshot& _ref) { _COPY(_ref); }
+			Snapshot& operator=(const Snapshot& _ref) {
+				_COPY(_ref);
+				return *this;
+			}
 		};
 
 		typedef struct Map {
+			Hash::SHA256 hashSnapshots[MAX_SNAPSHOTS_IN_MAP];
+			strNameT nameSave[MAX_SNAPSHOTS_IN_MAP];
+			std::time_t dateAdded[MAX_SNAPSHOTS_IN_MAP];
+			T_SNAPSHOT_SIZE_IN_MAP occuiped;
 
+			void _COPY(const Map& _ref) {
+				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
+					_MEMNULLCPY(this->hashSnapshots[i], _ref.hashSnapshots[i], sizeof(this->hashSnapshots[0]));
+					MEMNULLCPY(this->nameSave[i], _ref.nameSave[i], sizeof(this->nameSave[0]));
+					this->dateAdded[i] = _ref.dateAdded[i];
+				}
+				this->occuiped = _ref.occuiped;
+			}
+
+			void _CLEAR() {
+				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
+					_MEMSET(this->hashSnapshots[i], NULL, sizeof(this->hashSnapshots[0]));
+					MEMSET(this->nameSave[i], NULL_CHAR, sizeof(this->nameSave[i]));
+					this->dateAdded[i] = 0;
+				}
+				this->occuiped = 0;
+			}
 		};
 	}
 
@@ -91,7 +140,7 @@ namespace Data {
 				return *this;
 			}
 			
-			void updateValue(const T& _NewData) noexcept {
+			void setValue(const T& _NewData) noexcept {
 				memcpy(&this->data, &_NewData, sizeof(this->data));
 				_UPDATE_HASH();
 			}

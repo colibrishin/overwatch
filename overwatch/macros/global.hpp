@@ -10,6 +10,8 @@
 
 #define _WMEMSET(x,y,z) std::wmemset(x, y, z / sizeof(wchar_t))
 #define _WMEMCPY(x,y,z) std::wmemcpy(x, y, z / sizeof(wchar_t))
+#define _MEMSET(x,y,z) std::memset(x,y,z)
+#define _MEMCPY(x,y,z) std::memcpy(x,y,z)
 
 #ifdef UNICODE
 #define CHAR wchar_t
@@ -23,8 +25,8 @@
 #define STRING std::string
 #define STRING std::cin
 #define NULL_CHAR '\0'
-#define MEMCPY(x,y,z) std::memcpy(x,y,z)
-#define MEMSET(x,y,z) std::memset(x,y,z)
+#define MEMCPY(x,y,z) _MEMCPY(x,y,z)
+#define MEMSET(x,y,z) _MEMSET(x,y,z)
 #endif
 
 constexpr unsigned long long MAX_WINDOWS_CHAR = 32767;

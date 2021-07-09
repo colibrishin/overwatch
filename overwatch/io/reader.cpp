@@ -19,12 +19,12 @@ Reader::Serializer::Serializer(const Filesystem::pathT& pathTarget, const std::s
 			this->openWAFile();
 			break;
 		default:
+			this->isLastRequestOK = false;
 			throw std::runtime_error("Unknown Error, Occurred at Serializer() constructor.");
 			this->pException = std::current_exception();
-			this->isLastRequestOK = false;
 			break;
 	}
-	if (!(isLastRequestOK = checkChannelSanity())) return;
+	if (!this->good()) return;
 
 	if (requestCode == Code::READ) 
 		seekRFile();
@@ -48,14 +48,17 @@ void Reader::Serializer::setStep(const std::streamsize& nStep) noexcept {
 
 void Reader::Serializer::readFile(char* buf) {
 	if (!this->chIO.is_open()){
-		throw std::logic_error("File is not opened.");
 		this->isLastRequestOK = false;
+		throw std::logic_error("File is not opened.");
+		this->pException = std::current_exception();
 		return;
 	}
 	this->chIO.seekg(std::ios::end);
 	if ((this->chIO.tellp() - this->currPos) < 0) {
+		buf = new char('\n'); // TODO : Possible Memory Leak.
+		this->isLastRequestOK = false;
 		throw std::runtime_error("File is too short to read.");
-		buf = new char('\n');
+		this->pException = std::current_exception();
 		return;
 	}
 	this->chIO.seekg(this->currPos);
@@ -65,8 +68,9 @@ void Reader::Serializer::readFile(char* buf) {
 
 void Reader::Serializer::writeFile(char* buf, const std::streamsize& _BufSize) {
 	if (!this->chIO.is_open()) {
-		throw std::logic_error("File is not opened.");
 		this->isLastRequestOK = false;
+		throw std::logic_error("File is not opened.");
+		this->pException = std::current_exception();
 		return;
 	}
 	this->chIO.seekp(this->currPos);
