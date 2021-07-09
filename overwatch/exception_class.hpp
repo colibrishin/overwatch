@@ -31,7 +31,7 @@ public:
 		tmp.push_back(*errstr);
 		tmp.push_back(*" : ");
 		tmp.push_back(*detail);
-		return tmp.c_str();
+		return tmp.c_str(); // TODO : Find better way
 	}
 };
 

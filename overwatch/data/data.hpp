@@ -1,6 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
+#include <numeric>
 #include <cstdarg>
 
 #include "../macros/global.hpp"
@@ -11,10 +12,8 @@
 #include "../exception_class.hpp"
 
 namespace Data {
-
-	const static unsigned char MAX_SNAPSHOTS_IN_MAP = UCHAR_MAX;
 	using T_SNAPSHOT_SIZE_IN_MAP = unsigned char;
-
+	const static unsigned char MAX_SNAPSHOTS_IN_MAP = std::numeric_limits<T_SNAPSHOT_SIZE_IN_MAP>().max();
 
 	namespace Structures{
 		typedef struct Game {
