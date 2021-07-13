@@ -4,35 +4,46 @@
 #include <exception>
 #include <ios>
 
-class ExceptionClass{
-protected:
-    std::exception_ptr pException;
-public:
-    ExceptionClass() { this->pException = nullptr; }
-    const std::exception_ptr getException() const noexcept {
-        return this->pException;
-    };
-	bool good() const noexcept { 
-		return this->pException == nullptr; 
-	}
-};
+namespace Exceptions {
+	namespace LoaderException {
+		class LoaderException : public std::exception {
+			std::string errstr;
+		public:
+			LoaderException() = delete;
+			LoaderException(const std::string explain, const std::string detail) {
+				errstr.append(explain);
+				errstr.append(" : ");
+				errstr.append(detail);
+			}
+			const char* what() const { return errstr.c_str(); }
+		};
 
-class ErrorStrException : public std::exception {
-	char errstr[256];
-	char detail[512];
-public:
-	ErrorStrException() = delete;
-	ErrorStrException(const char* errstr, const char* detail) { 
-		memcpy_s(this->errstr, sizeof(this->errstr), errstr, sizeof(errstr));
-		memcpy_s(this->detail, sizeof(this->detail), detail, sizeof(detail));
+		class programming_error : public LoaderException {
+		public:
+			programming_error() = delete;
+			programming_error(const char* detail) : LoaderException("Programming Error", detail) {}
+		};
+
+		class file_invalidate : public LoaderException {
+		public:
+			file_invalidate() = delete;
+			file_invalidate(const char* detail) : LoaderException("File might have been corrupted.", detail) {}
+		};
 	}
-	const char* what() const {
-		std::string tmp;
-		tmp.push_back(*errstr);
-		tmp.push_back(*" : ");
-		tmp.push_back(*detail);
-		return tmp.c_str(); // TODO : Find better way
-	}
-};
+
+	class ExceptionClass {
+	protected:
+		std::exception_ptr pException;
+	public:
+		ExceptionClass() { this->pException = nullptr; }
+		const std::exception_ptr getException() const noexcept {
+			return this->pException;
+		};
+		bool good() const noexcept {
+			return this->pException == nullptr;
+		}
+	};
+}
+
 
 #endif

@@ -12,20 +12,6 @@
 #include "../io/reader.hpp"
 
 namespace Loader {
-	namespace Exceptions {
-		class programming_error : public ErrorStrException {
-		public:
-			programming_error() = delete;
-			programming_error(const char* detail) : ErrorStrException("Programming Error", detail) {}
-		};
-
-		class file_invalidate : public ErrorStrException {
-		public:
-			file_invalidate() = delete;
-			file_invalidate(const char* detail) : ErrorStrException("File might have been corrupted.", detail) {}
-		};
-	}
-
 	enum class Code {
 		OPEN = 1,
 		NEW = 2,
@@ -33,11 +19,11 @@ namespace Loader {
 	};
 
 	template<class T>
-	class Loader : public ExceptionClass { 
+	class Loader : public Exceptions::ExceptionClass { 
 		Data::Form::Hashable_Data<T> data;
 		Filesystem::Filesystem fs;
 		Reader::Serializer io;
-		Code request;
+		Code requestCode;
 
 	public:
 		Loader() = delete;
@@ -54,24 +40,24 @@ namespace Loader {
 
 			bool isCatch = false;
 
-			if (isCatch = fs.good()) this->pException = fs.getException();
-			else if (isCatch = io.good()) this->pException = io.getException();
-			if (isCatch) return;
+			if (!(isCatch = fs.good())) this->pException = fs.getException();
+			else if (!(isCatch = io.good())) this->pException = io.getException();
+			if (!isCatch) return;
 
 			if (_RequestCode == Code::OPEN) {
 				try {
 					io.readFile(reinterpret_cast<char*>(&data));
 				}
 				catch (std::logic_error& e) {
-					throw Exceptions::programming_error(e.what());
+					throw Exceptions::LoaderException::programming_error(e.what());
 					this->pException = std::current_exception();
 				}
 				catch (std::runtime_error& e) {
-					throw Exceptions::file_invalidate(e.what());
+					throw Exceptions::LoaderException::file_invalidate(e.what());
 					this->pException = std::current_exception();
 				}
 				if (!data.validateValue()) {
-					throw Exceptions::file_invalidate("Hash mismatch");
+					throw Exceptions::LoaderException::file_invalidate("Hash mismatch");
 					this->pException = std::current_exception();
 					return;
 				}
@@ -82,9 +68,9 @@ namespace Loader {
 
 		const T& getData() const noexcept { return this->data.getValue(); }
 		void setData(const T& _NewData) noexcept { this->data.setValue(_NewData); }
-		void writeData() const {
-			if (this->io.requestCode != Reader::Code::WRITE) {
-				throw Exceptions::programming_error("File is not opened at writeData()");
+		void writeData() {
+			if (this->requestCode != Code::WRITE || this->requestCode != Code::NEW) {
+				throw Exceptions::LoaderException::programming_error("writeData() didn't got a WRITE nor NEW defined Loader.");
 				this->pException = std::current_exception();
 				return;
 			}

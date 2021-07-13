@@ -15,7 +15,7 @@ namespace Reader {
 		APPEND = 3
 	};
 
-	class Serializer : public ExceptionClass{
+	class Serializer : public Exceptions::ExceptionClass{
 	private:
 		Filesystem::pathT path;
 		std::streamsize currPos;

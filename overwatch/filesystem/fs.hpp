@@ -14,7 +14,7 @@ namespace Filesystem {
 		CREATE = 2
 	};
 
-	class Filesystem : public ExceptionClass {
+	class Filesystem : public Exceptions::ExceptionClass {
 		pathT path;
 		Code requestCode;
 
