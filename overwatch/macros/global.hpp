@@ -37,4 +37,11 @@ using strProcT = CHAR[MAX_WINDOWS_CHAR + 1];
 using strPathT = CHAR[MAX_WINDOWS_CHAR + 1];
 using binStatusT = unsigned short;
 
+#define GAME_DIRECTORY "./game"
+#define SNAPSHOT_DIRECTORY "./snapshot"
+
+#define CONFIG_FILE "config.cfg"
+#define GAME_FILE_EXTENSION "gdat"
+#define SNAPSHOT_FILE_EXTENSION "sdat"
+
 #endif

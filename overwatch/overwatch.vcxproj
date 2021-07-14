@@ -143,22 +143,26 @@
   <ItemGroup>
     <ClInclude Include="data\data.hpp" />
     <ClInclude Include="data\loader.hpp" />
+    <ClInclude Include="data\manager.hpp" />
     <ClInclude Include="data\models.hpp" />
-    <ClInclude Include="exception_class.hpp" />
+    <ClInclude Include="exception.hpp" />
     <ClInclude Include="filesystem\fs.hpp" />
     <ClInclude Include="hash\hash.hpp" />
     <ClInclude Include="hash\sha256.h" />
     <ClInclude Include="io\reader.hpp" />
     <ClInclude Include="macros\global.hpp" />
     <ClInclude Include="macros\utility.hpp" />
+    <ClInclude Include="menu.hpp" />
     <ClInclude Include="win\winapi.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="data\manager.cpp" />
     <ClCompile Include="filesystem\fs.cpp" />
     <ClCompile Include="hash\hash.cpp" />
     <ClCompile Include="hash\sha256.cpp" />
     <ClCompile Include="io\reader.cpp" />
     <ClCompile Include="macros\utility.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="win\winapi.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

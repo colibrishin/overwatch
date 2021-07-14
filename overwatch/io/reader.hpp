@@ -6,31 +6,26 @@
 
 #include "../macros/global.hpp"
 #include "../filesystem/fs.hpp"
-#include "../exception_class.hpp"
 
 namespace Reader {
 	enum class Code {
-		READ = 1,
-		WRITE = 2,
-		APPEND = 3
+		READ,
+		WRITE
 	};
 
-	class Serializer : public Exceptions::ExceptionClass{
+	class Serializer {
 	private:
 		Filesystem::pathT path;
 		std::streamsize currPos;
 		std::streamsize step;
 		std::fstream chIO;
 
-		bool isLastRequestOK;
 		Code requestCode;
 
-		bool checkChannelSanity() const noexcept;
-		void openRFile() noexcept;
-		void openWFile() noexcept;
-		void openWAFile() noexcept;
-		void seekRFile() noexcept;
-		void seekWFile() noexcept;
+		void openRFile() ;
+		void openWFile() ;
+		void seekRFile() ;
+		void seekWFile() ;
 	public:
 		Serializer(const Filesystem::pathT& _TargetFile, const std::streamsize& _PosToSeek, const Code& _ReadOrWrite);
 		Serializer(const Filesystem::pathT& _TargetFile, const std::streamsize& _PosToSeek, const std::streamsize& _SeekStep, const Code& _ReadOrWrite);
@@ -38,7 +33,6 @@ namespace Reader {
 		void setStep(const std::streamsize& _SeekStep) noexcept;
 		void readFile(char* buf);
 		void writeFile(char* buf, const std::streamsize& _BufSize);
-		bool good() const noexcept;
 	};
 }
 #endif

@@ -2,27 +2,31 @@
 #define FS_H
 
 #include <filesystem>
+#include <list>
+#include <memory>
 
 #include "../macros/global.hpp"
-#include "../exception_class.hpp"
 
 namespace Filesystem {
 	using pathT = std::filesystem::path;
+	using listPathT = std::list<pathT>;
 
 	enum class Code {
-		CHECK = 1,
-		CREATE = 2
+		CHECK,
+		CREATE
 	};
 
-	class Filesystem : public Exceptions::ExceptionClass {
+	class Filesystem {
 		pathT path;
 		Code requestCode;
 
 	public:
 		Filesystem() = delete;
 		Filesystem(const pathT& _Path, const Code& _RequestCode);
-		pathT getPath() const noexcept;
-		Code getRequestType() const noexcept;
+
+		const pathT& getPath() const noexcept;
+		const listPathT iteratePath() const noexcept;
+		const Code& getRequestType() const noexcept;
 	};
 }
 

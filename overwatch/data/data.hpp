@@ -9,7 +9,6 @@
 #include "../macros/utility.hpp"
 #include "../io/reader.hpp"
 #include "../filesystem/fs.hpp"
-#include "../exception_class.hpp"
 
 namespace Data {
 	using T_SNAPSHOT_SIZE_IN_MAP = unsigned char;
@@ -151,7 +150,7 @@ namespace Data {
 				return Hash::compareHash(tmp, this->hash);
 			}
 
-			const T getValue() const noexcept {
+			const T& getValue() const noexcept {
 				return this->data;
 			}
 		};

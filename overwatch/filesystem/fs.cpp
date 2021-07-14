@@ -1,5 +1,4 @@
 #include "fs.hpp"
-#include <exception>
 
 Filesystem::Filesystem::Filesystem(const pathT& pathFS, const Code& codeChkOrCreate) {
 	this->path = path;
@@ -8,16 +7,22 @@ Filesystem::Filesystem::Filesystem(const pathT& pathFS, const Code& codeChkOrCre
 		std::filesystem::exists(path.parent_path());
 		if (codeChkOrCreate == Code::CREATE)
 			std::filesystem::create_directories(path);
-		this->pException = nullptr;
 	} catch (const std::filesystem::filesystem_error& e) {
-		this->pException = std::current_exception();
+		throw e;
 	}
 }
 
-Filesystem::pathT Filesystem::Filesystem::getPath() const noexcept{
+const Filesystem::pathT& Filesystem::Filesystem::getPath() const noexcept{
 	return this->path;
 }
 
-Filesystem::Code Filesystem::Filesystem::getRequestType() const noexcept {
+const Filesystem::listPathT Filesystem::Filesystem::iteratePath() const noexcept{
+	listPathT rtn;
+	for (auto it : std::filesystem::directory_iterator(this->path))
+		rtn.push_back(it.path());
+	return rtn;
+}
+
+const Filesystem::Code& Filesystem::Filesystem::getRequestType() const noexcept {
 	return this->requestCode;
 }
