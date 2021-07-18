@@ -1,5 +1,34 @@
 #include <algorithm>
 #include "utility.hpp"
+#include "../exception.hpp"
+
+void Utility::_String::_charNULLSafeCopy(char* DST, unsigned long long DSTSize, const char* SRC, unsigned long long SRCSize) {
+	bool isOverflow;
+	if (isOverflow = (SRCSize > DSTSize)) SRCSize = DSTSize;
+
+	std::streamsize size = DSTSize > SRCSize ? SRCSize : DSTSize;
+
+	for (int i = 0; i < size; ++i) {
+		DST[i] = SRC[i];
+	}
+
+	if (isOverflow) DST[DSTSize - 1] = '\0';
+	else DST[size - 1] = '\0';
+}
+
+void Utility::_String::_wcharNULLSafeCopy(wchar_t* DST, unsigned long long DSTSize, const wchar_t* SRC, unsigned long long SRCSize) {
+	bool isOverflow;
+	if (isOverflow = (SRCSize > DSTSize)) SRCSize = DSTSize;
+
+	std::streamsize size = DSTSize > SRCSize ? SRCSize : DSTSize;
+
+	for (int i = 0; i < size; ++i) {
+		DST[i] = SRC[i];
+	}
+
+	if (isOverflow) DST[DSTSize - 1] = L'\0';
+	else DST[size - 1] = '\0';
+}
 
 void Utility::_String::_charNULLbreakCopy(char* DST, const char* SRC, unsigned long long SZ) {
 	for (int i = 0; i < SZ; ++i) {
@@ -13,15 +42,14 @@ void Utility::_String::_charNULLbreakCopy(char* DST, const char* SRC, unsigned l
 }
 
 void Utility::_String::_wcharNULLbreakCopy(wchar_t* DST, const wchar_t* SRC, unsigned long long SZ) {
-	SZ = SZ / sizeof(wchar_t);
 	for (int i = 0; i < SZ; ++i) {
-		if (SRC[i] == '\0') {
-			DST[i] = '\0';
+		if (SRC[i] == L'\0') {
+			DST[i] = L'\0';
 			break;
 		}
 		DST[i] = SRC[i];
 	}
-	DST[SZ - 1] = '\0';
+	DST[SZ - 1] = L'\0';
 }
 
 bool Utility::_String::_isNumber(const std::string& s) {

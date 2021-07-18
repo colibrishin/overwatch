@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <string>
 
+#include "../hash/hash.hpp"
 #include "../data/data.hpp"
 #include "../data/models.hpp"
 #include "../exception.hpp"
@@ -13,6 +14,7 @@
 
 namespace Loader {
 	enum class Code {
+		NEW,
 		OPEN,
 		WRITE
 	};
@@ -26,15 +28,27 @@ namespace Loader {
 
 	public:
 		Loader() = delete;
-		Loader(const Filesystem::pathT& _PathToFile, const Code& _RequestCode) : fs(_PathToFile, Filesystem::Code::CHECK), io(_PathToFile, 0, Reader::Code::READ) {
+		Loader(const Filesystem::pathT& _PathToFile, const Code& _RequestCode) {
+			
+			this->requestCode = _RequestCode;
 			try {
-				if (_RequestCode == Code::WRITE) {
+				if (_RequestCode == Code::NEW) {
 					this->fs = Filesystem::Filesystem(_PathToFile, Filesystem::Code::CREATE);
 					this->io = Reader::Serializer(_PathToFile, 0, Reader::Code::WRITE);
 				}
 
 				if (_RequestCode == Code::OPEN) {
-					io.readFile(reinterpret_cast<char*>(&data));
+					this->fs = Filesystem::Filesystem(_PathToFile, Filesystem::Code::CHECK);
+					this->io = Reader::Serializer(_PathToFile, 0, Reader::Code::READ);
+				}
+
+				if (_RequestCode == Code::WRITE) {
+					this->fs = Filesystem::Filesystem(_PathToFile, Filesystem::Code::CREATE);
+					this->io = Reader::Serializer(_PathToFile, 0, Reader::Code::APPEND);
+				}
+
+				if (_RequestCode == Code::OPEN) {
+					io.readFile(reinterpret_cast<char*>(&data), sizeof(data));
 					if (!data.validateValue())
 						throw Exceptions::file_invalidate("Hash mismatch");
 				}
@@ -49,12 +63,25 @@ namespace Loader {
 		Loader(const Loader& _ref) = delete;
 		Loader& operator=(const Loader& _ref) = delete;
 
-		const T& getData() const noexcept { return this->data.getValue(); }
-		void setData(const T& _NewData) noexcept { this->data.setValue(_NewData); }
+		const Data::Form::Hashable_Data<T>& getData() const noexcept { return this->data; }
+		void setData(const Data::Form::Hashable_Data<T>& _NewData) noexcept { this->data = _NewData; }
+		Hash::SHA256 getHash() const noexcept { return this->data.getHash(); }
 		void writeData() {
-			T* ptr = const_cast<T*>(&this->getData());
+			Data::Form::Hashable_Data<T>* ptr = const_cast<Data::Form::Hashable_Data<T>*>(&this->data);
 			try {
-				this->io.writeFile(reinterpret_cast<char*>(ptr), sizeof(this->data.getValue()));
+				this->io.writeFile(reinterpret_cast<char*>(ptr), sizeof(this->data));
+			}
+			catch (const std::ios::failure& e) {
+				throw Exceptions::Exception(e);
+			}
+		}
+		void renameData(const Filesystem::pathT& newPath) {
+			try {
+				this->fs.move(newPath);
+				this->io.changeFile(newPath);
+			}
+			catch (const std::filesystem::filesystem_error& e) {
+				throw Exceptions::Exception(e);
 			}
 			catch (const std::ios::failure& e) {
 				throw Exceptions::Exception(e);

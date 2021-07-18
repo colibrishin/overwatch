@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\test">
+      <UniqueIdentifier>{4f788afa-73e7-494b-8483-ded53b0d0f73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\test">
+      <UniqueIdentifier>{0228ae85-8b26-454f-b86b-081fc3807478}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exception.hpp">
@@ -54,6 +60,9 @@
     <ClInclude Include="data\manager.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="test.hpp">
+      <Filter>헤더 파일\test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="filesystem\fs.cpp">
@@ -78,6 +87,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="data\manager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>소스 파일\test</Filter>
+    </ClCompile>
+    <ClCompile Include="data\models.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

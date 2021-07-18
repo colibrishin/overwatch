@@ -12,6 +12,7 @@ namespace Filesystem {
 	using listPathT = std::list<pathT>;
 
 	enum class Code {
+		INIT,
 		CHECK,
 		CREATE
 	};
@@ -21,12 +22,15 @@ namespace Filesystem {
 		Code requestCode;
 
 	public:
-		Filesystem() = delete;
+		Filesystem();
 		Filesystem(const pathT& _Path, const Code& _RequestCode);
 
 		const pathT& getPath() const noexcept;
+		pathT pathWithoutFilename() const noexcept;
 		const listPathT iteratePath() const noexcept;
 		const Code& getRequestType() const noexcept;
+		void move(const pathT& newPath);
+		void copy(const pathT& ToPath);
 	};
 }
 

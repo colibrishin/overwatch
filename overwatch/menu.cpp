@@ -1,5 +1,7 @@
 #include "menu.hpp"
-#include "data/loader.hpp"
+#include "test.hpp"
 
 int main(void) {
+	Manager::Manager manager;
+	Test::CreateDummyGame(manager);
 }

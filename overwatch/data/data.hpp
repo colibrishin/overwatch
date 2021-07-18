@@ -23,19 +23,19 @@ namespace Data {
 			strProcT strExtenison;
 
 			void _COPY(const Game& _ref) {
-				MEMNULLCPY(nameGame, _ref.nameGame, sizeof(nameGame));
-				MEMNULLCPY(nameProc, _ref.nameProc, sizeof(nameProc));
-				MEMNULLCPY(pathGame, _ref.pathGame, sizeof(pathGame));
-				MEMNULLCPY(pathSave, _ref.pathSave, sizeof(pathSave));
-				MEMNULLCPY(strExtenison, _ref.strExtenison, sizeof(strExtenison));
+				MEMNULLCPY(nameGame, _ref.nameGame, sizeof(nameGame) / sizeof(CHAR));
+				MEMNULLCPY(nameProc, _ref.nameProc, sizeof(nameProc) / sizeof(CHAR));
+				MEMNULLCPY(pathGame, _ref.pathGame, sizeof(pathGame) / sizeof(CHAR));
+				MEMNULLCPY(pathSave, _ref.pathSave, sizeof(pathSave) / sizeof(CHAR));
+				MEMNULLCPY(strExtenison, _ref.strExtenison, sizeof(strExtenison) / sizeof(CHAR));
 			}
 			
 			void _CLEAR() {
-				MEMSET(nameGame, NULL_CHAR, sizeof(nameGame));
-				MEMSET(nameProc, NULL_CHAR, sizeof(nameProc));
-				MEMSET(pathGame, NULL_CHAR, sizeof(pathGame));
-				MEMSET(pathSave, NULL_CHAR, sizeof(pathSave));
-				MEMSET(strExtenison, NULL_CHAR, sizeof(strExtenison));
+				MEMSET(nameGame, NULL_CHAR, sizeof(nameGame) / sizeof(CHAR));
+				MEMSET(nameProc, NULL_CHAR, sizeof(nameProc) / sizeof(CHAR));
+				MEMSET(pathGame, NULL_CHAR, sizeof(pathGame) / sizeof(CHAR));
+				MEMSET(pathSave, NULL_CHAR, sizeof(pathSave) / sizeof(CHAR));
+				MEMSET(strExtenison, NULL_CHAR, sizeof(strExtenison) / sizeof(CHAR));
 			}
 
 			Game() { _CLEAR(); }
@@ -51,22 +51,25 @@ namespace Data {
 			Hash::SHA256 hashSnapshot;
 			std::time_t dateAdded;
 			strNameT nameSave;
+			strPathT pathCopy;
 			strPathT pathSave;
 
 			void _COPY(const Snapshot& _ref) {
-				_MEMNULLCPY(this->hashGame, _ref.hashGame, sizeof(this->hashGame));
-				_MEMNULLCPY(this->hashSnapshot, _ref.hashSnapshot, sizeof(this->hashSnapshot));
+				this->hashGame = _ref.hashGame;
+				this->hashSnapshot = _ref.hashSnapshot;
 				this->dateAdded = _ref.dateAdded;
-				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(this->nameSave));
-				MEMNULLCPY(this->pathSave, _ref.pathSave, sizeof(this->pathSave));
+				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(this->nameSave) / sizeof(CHAR));
+				MEMNULLCPY(this->pathCopy, _ref.pathCopy, sizeof(this->pathCopy) / sizeof(CHAR));
+				MEMNULLCPY(this->pathSave, _ref.pathSave, sizeof(this->pathSave) / sizeof(CHAR));
 			}
 
 			void _CLEAR() {
-				_MEMSET(this->hashGame, '\0', sizeof(this->hashGame));
-				_MEMSET(this->hashSnapshot, '\0', sizeof(this->hashSnapshot));
+				this->hashGame.clear();
+				this->hashSnapshot.clear();
 				this->dateAdded = 0;
-				MEMSET(this->nameSave, NULL_CHAR, sizeof(this->nameSave));
-				MEMSET(this->pathSave, NULL_CHAR, sizeof(this->pathSave));
+				MEMSET(this->nameSave, NULL_CHAR, sizeof(this->nameSave) / sizeof(CHAR));
+				MEMSET(this->pathCopy, NULL_CHAR, sizeof(this->pathCopy) / sizeof(CHAR));
+				MEMSET(this->pathSave, NULL_CHAR, sizeof(this->pathSave) / sizeof(CHAR));
 			}
 
 			Snapshot() { _CLEAR(); }
@@ -76,7 +79,7 @@ namespace Data {
 				return *this;
 			}
 		};
-
+		
 		typedef struct Map {
 			Hash::SHA256 hashSnapshots[MAX_SNAPSHOTS_IN_MAP];
 			strNameT nameSave[MAX_SNAPSHOTS_IN_MAP];
@@ -85,8 +88,8 @@ namespace Data {
 
 			void _COPY(const Map& _ref) {
 				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
-					_MEMNULLCPY(this->hashSnapshots[i], _ref.hashSnapshots[i], sizeof(this->hashSnapshots[0]));
-					MEMNULLCPY(this->nameSave[i], _ref.nameSave[i], sizeof(this->nameSave[0]));
+					hashSnapshots[i] = _ref.hashSnapshots[i];
+					MEMNULLCPY(this->nameSave[i], _ref.nameSave[i], sizeof(this->nameSave[0]) / sizeof(CHAR));
 					this->dateAdded[i] = _ref.dateAdded[i];
 				}
 				this->occuiped = _ref.occuiped;
@@ -94,8 +97,8 @@ namespace Data {
 
 			void _CLEAR() {
 				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
-					_MEMSET(this->hashSnapshots[i], NULL, sizeof(this->hashSnapshots[0]));
-					MEMSET(this->nameSave[i], NULL_CHAR, sizeof(this->nameSave[i]));
+					hashSnapshots[i].clear();
+					MEMSET(this->nameSave[i], NULL_CHAR, sizeof(this->nameSave[i]) / sizeof(CHAR));
 					this->dateAdded[i] = 0;
 				}
 				this->occuiped = 0;
@@ -105,23 +108,23 @@ namespace Data {
 
 	namespace Form {
 		template<class T>
-		class Hashable_Data {
+		struct Hashable_Data {
 		private:
 			Hash::SHA256 hash;
 			T data;
 
 			void _COPY(const Hashable_Data<T>& _ref) noexcept {
-				memcpy(this->hash, _ref.hash, sizeof(this->hash));
+				this->hash = _ref.hash;
 				this->data = _ref.data;
 			}
 
 			void _CLEAR() noexcept {
-				memset(this->hash, 0, sizeof(this->hash));
+				this->hash.clear();
 				this->data._CLEAR();
 			}
 
 			void _UPDATE_HASH() noexcept{
-				Hash::calcHash(reinterpret_cast<char*>(&this->data), this->hash);
+				hash = Hash::SHA256(reinterpret_cast<char*>(&data));
 			}
 
 		public:
@@ -131,6 +134,11 @@ namespace Data {
 
 			Hashable_Data(const Hashable_Data<T>& _ref) {
 				_COPY(_ref);
+			}
+
+			Hashable_Data(const T& _ref) {
+				this->data = _ref;
+				_UPDATE_HASH();
 			}
 
 			Hashable_Data<T>& operator=(const Hashable_Data<T>& _ref) {
@@ -144,10 +152,12 @@ namespace Data {
 			}
 
 			bool validateValue() {
-				Hash::SHA256 tmp;
-				Hash::calcHash(reinterpret_cast<char*>(&this->data), tmp);
+				Hash::SHA256 tmp(reinterpret_cast<char*>(&this->data));
+				return this->hash == tmp;
+			}
 
-				return Hash::compareHash(tmp, this->hash);
+			Hash::SHA256 getHash() const noexcept {
+				return this->hash;
 			}
 
 			const T& getValue() const noexcept {

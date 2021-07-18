@@ -1,7 +1,8 @@
-#ifndef EXCEPTION_CLASS_H
-#define EXCEPTION_CLASS_H
+#ifndef EXCEPTION_H
+#define EXCEPTION_H
 
 #include <exception>
+#include <filesystem>
 #include <ios>
 
 namespace Exceptions {
@@ -38,6 +39,18 @@ namespace Exceptions {
 	public:
 		file_invalidate() = delete;
 		file_invalidate(const char* detail) : Exception("File might have been corrupted.", detail) {}
+	};
+
+	class add_snapshot_failed : public Exception {
+	public:
+		add_snapshot_failed() = delete;
+		add_snapshot_failed(const char* detail) : Exception("Failed to add snapshot.", detail) {}
+	};
+
+	class create_game_failed : public Exception {
+	public:
+		create_game_failed() = delete;
+		create_game_failed(const char* detail) : Exception("Failed to create game.", detail) {}
 	};
 	
 }

@@ -153,16 +153,19 @@
     <ClInclude Include="macros\global.hpp" />
     <ClInclude Include="macros\utility.hpp" />
     <ClInclude Include="menu.hpp" />
+    <ClInclude Include="test.hpp" />
     <ClInclude Include="win\winapi.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="data\manager.cpp" />
+    <ClCompile Include="data\models.cpp" />
     <ClCompile Include="filesystem\fs.cpp" />
     <ClCompile Include="hash\hash.cpp" />
     <ClCompile Include="hash\sha256.cpp" />
     <ClCompile Include="io\reader.cpp" />
     <ClCompile Include="macros\utility.cpp" />
     <ClCompile Include="menu.cpp" />
+    <ClCompile Include="test.cpp" />
     <ClCompile Include="win\winapi.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
