@@ -54,14 +54,14 @@
     <ClInclude Include="io\reader.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="menu.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="data\manager.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="test.hpp">
       <Filter>헤더 파일\test</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.hpp">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,9 +83,6 @@
     <ClCompile Include="win\winapi.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="menu.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="data\manager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -93,6 +90,9 @@
       <Filter>소스 파일\test</Filter>
     </ClCompile>
     <ClCompile Include="data\models.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="menu.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

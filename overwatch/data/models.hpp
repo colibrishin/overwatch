@@ -25,6 +25,7 @@ namespace Models {
 
 	class Game : public Model<Data::Structures::Game> {
 	public:
+		Game() {};
 		Game(const STRING& nameGame, const STRING& nameProc, const STRING& pathGame, const STRING& pathSave, const STRING& ExtensionOfSave);
 		void setName(const STRING& nameGame) noexcept;
 		void setProcessName(const STRING& nameProc) noexcept;
@@ -35,6 +36,7 @@ namespace Models {
 
 	class Snapshot : public Model<Data::Structures::Snapshot>{
 	public:
+		Snapshot() {};
 		Snapshot(const STRING& nameSave, const Filesystem::pathT& pathSave);
 		void setName(const STRING& nameSave) noexcept;
 		void setTime(const std::time_t& dateAdded) noexcept;

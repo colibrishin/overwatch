@@ -14,7 +14,7 @@
 #define _MEMCPY(x,y,z) std::memcpy(x,y,z)
 
 #ifdef UNICODE
-#define CHAR wchar_t
+#define CHAR_T wchar_t
 #define STRING std::wstring
 #define CIN std::wcin
 #define NULL_CHAR L'\0'
@@ -35,9 +35,9 @@
 constexpr unsigned long long MAX_WINDOWS_CHAR = 32767;
 constexpr unsigned long long MAX_DATA_NAME = 500;
 
-using strNameT = CHAR[MAX_DATA_NAME + 1];
-using strProcT = CHAR[MAX_WINDOWS_CHAR + 1];
-using strPathT = CHAR[MAX_WINDOWS_CHAR + 1];
+using strNameT = CHAR_T[MAX_DATA_NAME + 1];
+using strProcT = CHAR_T[MAX_WINDOWS_CHAR + 1];
+using strPathT = CHAR_T[MAX_WINDOWS_CHAR + 1];
 
 #define GAME_DIRECTORY "game/"
 #define SNAPSHOT_DIRECTORY "snapshot/"

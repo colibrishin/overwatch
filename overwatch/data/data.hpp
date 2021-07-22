@@ -11,7 +11,9 @@
 #include "../filesystem/fs.hpp"
 
 namespace Data {
-	using T_SNAPSHOT_SIZE_IN_MAP = unsigned char;
+	using T_SNAPSHOT_SIZE_IN_MAP = unsigned 
+		
+		;
 	const static unsigned char MAX_SNAPSHOTS_IN_MAP = std::numeric_limits<T_SNAPSHOT_SIZE_IN_MAP>().max();
 
 	namespace Structures{
@@ -23,19 +25,19 @@ namespace Data {
 			strProcT strExtenison;
 
 			void _COPY(const Game& _ref) {
-				MEMNULLCPY(nameGame, _ref.nameGame, sizeof(nameGame) / sizeof(CHAR));
-				MEMNULLCPY(nameProc, _ref.nameProc, sizeof(nameProc) / sizeof(CHAR));
-				MEMNULLCPY(pathGame, _ref.pathGame, sizeof(pathGame) / sizeof(CHAR));
-				MEMNULLCPY(pathSave, _ref.pathSave, sizeof(pathSave) / sizeof(CHAR));
-				MEMNULLCPY(strExtenison, _ref.strExtenison, sizeof(strExtenison) / sizeof(CHAR));
+				MEMNULLCPY(nameGame, _ref.nameGame, sizeof(nameGame) / sizeof(CHAR_T));
+				MEMNULLCPY(nameProc, _ref.nameProc, sizeof(nameProc) / sizeof(CHAR_T));
+				MEMNULLCPY(pathGame, _ref.pathGame, sizeof(pathGame) / sizeof(CHAR_T));
+				MEMNULLCPY(pathSave, _ref.pathSave, sizeof(pathSave) / sizeof(CHAR_T));
+				MEMNULLCPY(strExtenison, _ref.strExtenison, sizeof(strExtenison) / sizeof(CHAR_T));
 			}
 			
 			void _CLEAR() {
-				MEMSET(nameGame, NULL_CHAR, sizeof(nameGame) / sizeof(CHAR));
-				MEMSET(nameProc, NULL_CHAR, sizeof(nameProc) / sizeof(CHAR));
-				MEMSET(pathGame, NULL_CHAR, sizeof(pathGame) / sizeof(CHAR));
-				MEMSET(pathSave, NULL_CHAR, sizeof(pathSave) / sizeof(CHAR));
-				MEMSET(strExtenison, NULL_CHAR, sizeof(strExtenison) / sizeof(CHAR));
+				MEMSET(nameGame, NULL_CHAR, sizeof(nameGame) / sizeof(CHAR_T));
+				MEMSET(nameProc, NULL_CHAR, sizeof(nameProc) / sizeof(CHAR_T));
+				MEMSET(pathGame, NULL_CHAR, sizeof(pathGame) / sizeof(CHAR_T));
+				MEMSET(pathSave, NULL_CHAR, sizeof(pathSave) / sizeof(CHAR_T));
+				MEMSET(strExtenison, NULL_CHAR, sizeof(strExtenison) / sizeof(CHAR_T));
 			}
 
 			Game() { _CLEAR(); }
@@ -58,18 +60,18 @@ namespace Data {
 				this->hashGame = _ref.hashGame;
 				this->hashSnapshot = _ref.hashSnapshot;
 				this->dateAdded = _ref.dateAdded;
-				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(this->nameSave) / sizeof(CHAR));
-				MEMNULLCPY(this->pathCopy, _ref.pathCopy, sizeof(this->pathCopy) / sizeof(CHAR));
-				MEMNULLCPY(this->pathSave, _ref.pathSave, sizeof(this->pathSave) / sizeof(CHAR));
+				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(this->nameSave) / sizeof(CHAR_T));
+				MEMNULLCPY(this->pathCopy, _ref.pathCopy, sizeof(this->pathCopy) / sizeof(CHAR_T));
+				MEMNULLCPY(this->pathSave, _ref.pathSave, sizeof(this->pathSave) / sizeof(CHAR_T));
 			}
 
 			void _CLEAR() {
 				this->hashGame.clear();
 				this->hashSnapshot.clear();
 				this->dateAdded = 0;
-				MEMSET(this->nameSave, NULL_CHAR, sizeof(this->nameSave) / sizeof(CHAR));
-				MEMSET(this->pathCopy, NULL_CHAR, sizeof(this->pathCopy) / sizeof(CHAR));
-				MEMSET(this->pathSave, NULL_CHAR, sizeof(this->pathSave) / sizeof(CHAR));
+				MEMSET(this->nameSave, NULL_CHAR, sizeof(this->nameSave) / sizeof(CHAR_T));
+				MEMSET(this->pathCopy, NULL_CHAR, sizeof(this->pathCopy) / sizeof(CHAR_T));
+				MEMSET(this->pathSave, NULL_CHAR, sizeof(this->pathSave) / sizeof(CHAR_T));
 			}
 
 			Snapshot() { _CLEAR(); }
@@ -89,7 +91,7 @@ namespace Data {
 			void _COPY(const Map& _ref) {
 				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
 					hashSnapshots[i] = _ref.hashSnapshots[i];
-					MEMNULLCPY(this->nameSave[i], _ref.nameSave[i], sizeof(this->nameSave[0]) / sizeof(CHAR));
+					MEMNULLCPY(this->nameSave[i], _ref.nameSave[i], sizeof(this->nameSave[0]) / sizeof(CHAR_T));
 					this->dateAdded[i] = _ref.dateAdded[i];
 				}
 				this->occuiped = _ref.occuiped;
@@ -98,7 +100,7 @@ namespace Data {
 			void _CLEAR() {
 				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
 					hashSnapshots[i].clear();
-					MEMSET(this->nameSave[i], NULL_CHAR, sizeof(this->nameSave[i]) / sizeof(CHAR));
+					MEMSET(this->nameSave[i], NULL_CHAR, sizeof(this->nameSave[i]) / sizeof(CHAR_T));
 					this->dateAdded[i] = 0;
 				}
 				this->occuiped = 0;

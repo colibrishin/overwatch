@@ -52,12 +52,24 @@ void Utility::_String::_wcharNULLbreakCopy(wchar_t* DST, const wchar_t* SRC, uns
 	DST[SZ - 1] = L'\0';
 }
 
+const std::time_t Utility::getUnixTime() noexcept {
+	return std::time(nullptr);
+}
+
 bool Utility::_String::_isNumber(const std::string& s) {
 	return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
 }
 
 bool Utility::_String::_isWNumber(const std::wstring& s) {
 	return !s.empty() && std::all_of(s.begin(), s.end(), ::iswdigit);
+}
+
+bool Utility::_String::_isAlphabetic(const std::string& s) {
+	return !s.empty() && std::all_of(s.begin(), s.end(), ::isalpha);
+}
+
+bool Utility::_String::_isWAlphabetic(const std::wstring& s) {
+	return !s.empty() && std::all_of(s.begin(), s.end(), ::isalpha);
 }
 
 bool Utility::_String::_isStrEmpty(const char* s) {

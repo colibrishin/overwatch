@@ -4,11 +4,12 @@
 #include "data/loader.hpp"
 #include <cstdlib>
 
-void Test::CreateDummyGame(Manager::Manager& manager) {
+std::unique_ptr<Manager::Manager> Test::CreateDummyGame(std::unique_ptr<Manager::Manager> manager) {
 	Models::Game* game;
 	game = new Models::Game(L"Dummy", L"Dummy.exe", L"C:\\", L"C:\\save", L".sav");
 
-	manager.createGame(*game);
+	manager->createGame(*game);
 	delete game;
 	system("pause");
+	return std::move(manager);
 }

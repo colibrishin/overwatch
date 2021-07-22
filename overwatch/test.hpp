@@ -4,7 +4,7 @@
 #include "data/manager.hpp"
 
 namespace Test {
-	void CreateDummyGame(Manager::Manager& manager);
-	void TestModel();
+	std::unique_ptr<Manager::Manager> CreateDummyGame(std::unique_ptr<Manager::Manager> manager);
+	int main(void);
 }
 #endif

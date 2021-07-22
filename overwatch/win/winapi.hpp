@@ -17,30 +17,13 @@ namespace WinAPI {
 	namespace Process {
 
 		namespace Types {
-			using mapProcessList = std::map<unsigned int, STRING>;
+			using mapProcessList = std::list<STRING>;
 		}
 
 		namespace Constants {
 			constexpr unsigned short MAX_WINDOWS_PATH_LENGTH = 32767;
-			// There's same macro in winapi.hpp
-
-			constexpr const char* STR_ERR_HANDLE_ACQUIRE_FAILED = "WinAPI Failed to acquire Process handle";
-			constexpr const char* STR_ERR_PROCESS32FIRSTERROR = "WinAPI Failed to acquire Process32First handle";
-			constexpr const char* STR_ERR_HPROCESS_NULL = "WinAPI Failed to acquire HProcess handle";
-			constexpr const char* STR_ERR_QUERY_PROCESS_IMAGE_FAILED = "WinAPI Process Querying Failed";
-
-
-			namespace Returns {
-				constexpr const unsigned short HANDLE_ACQUIRE_FAILED = 2;
-				constexpr const unsigned short PROCESS32FIRSTERROR = 4;
-				constexpr const unsigned short HPROCESS_NULL = 8;
-				constexpr const unsigned short QUERY_PROCESS_IMAGE_FAILED = 16;
-			}
 		}
 
-		namespace Utility {
-			std::string getErrorMessage(unsigned short code);
-		}
 		void getProcesses(WinAPI::Process::Types::mapProcessList& plist);
 		void getPathProcess(std::filesystem::path& pathProc, const unsigned int& nPID);
 		// TODO: Refactor to Exception

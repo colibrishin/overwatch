@@ -52,6 +52,18 @@ namespace Exceptions {
 		create_game_failed() = delete;
 		create_game_failed(const char* detail) : Exception("Failed to create game.", detail) {}
 	};
+
+	class invalid_input : public Exception {
+	public:
+		invalid_input() = delete;
+		invalid_input(const char* detail) : Exception("Invalid Input", detail) {}
+	};
+
+	class winapi_error : public Exception {
+	public:
+		winapi_error() = delete;
+		winapi_error(const char* detail) : Exception("WinAPI Error", detail) {}
+	};
 	
 }
 
