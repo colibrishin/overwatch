@@ -33,23 +33,31 @@ void WinAPI::Process::getProcesses(WinAPI::Process::Types::mapProcessList& plist
         if (hProcess == INVALID_HANDLE_VALUE)
             CloseHandle(hProcessSnap);
         // TODO : IF PROCESS IN BLACKLIST, SKIP
-        plist.push_back(STRING(pe32.szExeFile));
+        plist.insert({ pe32.th32ProcessID, STRING(pe32.szExeFile) + NULL_CHAR });
     } while (Process32Next(hProcessSnap, &pe32));
 
     CloseHandle(hProcessSnap);
 
-    return; // TODO
+    return;
 }
 
-void WinAPI::Process::getPathProcess(std::filesystem::path& pathProc, const unsigned int& nPID){
+void WinAPI::Process::getPathProcess(std::filesystem::path& pathProc, const unsigned int& nPID) {
     DWORD PID = nPID;
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, PID);
+    // TODO : OpenProcess gives NULL Pointer even if program is running in administrator privilege
+    if (hProcess == NULL) {
+        throw Exceptions::winapi_error("Invalid hProcess Handle, this might have occurred due to lack of privilege or possibly program has been closed.");
+    }
 
-    DWORD value = MAX_PATH;
-    CHAR_T buffer[MAX_PATH];
-    if (!QueryFullProcessImageName(hProcess, 0, buffer, &value))
-        return; // TODO
+    DWORD value = MAX_WINDOWS_CHAR;
+    CHAR_T* buffer = new CHAR_T[MAX_WINDOWS_CHAR];
+    if (!QueryFullProcessImageName(hProcess, 0, buffer, &value)) {
+        delete[] buffer;
+        throw Exceptions::winapi_error("QueryFullProcessImageName Failed");
+    }
     pathProc = buffer;
 
-    return; // TODO
+    delete[] buffer;
+    CloseHandle(hProcess);
+    return;
 }

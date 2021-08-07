@@ -49,8 +49,9 @@ namespace Manager {
 		void createTmpFile(Models::Snapshot& snapshot);
 	public:
 		Manager();
-		const Filesystem::listPathT iterateGameData() noexcept;
+		Filesystem::listPathT iterateGameData() noexcept;
 		bool isGameLoaded();
+		std::list<STRING> listGames(Filesystem::listPathT& path);
 		void loadGame(Filesystem::pathT& path);
 		void unloadGame(const Code& typeOpen);
 		void createGame(const Models::Game& data);

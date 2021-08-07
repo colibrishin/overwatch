@@ -17,6 +17,7 @@
 #define CHAR_T wchar_t
 #define STRING std::wstring
 #define CIN std::wcin
+#define COUT std::wcout
 #define NULL_CHAR L'\0'
 #define MEMCPY(x,y,z) _WMEMCPY(x,y,z)
 #define MEMSET(x,y,z) _WMEMSET(x,y,z)
@@ -24,7 +25,8 @@
 #else
 #define CHAR char
 #define STRING std::string
-#define STRING std::cin
+#define CIN std::cin
+#define COUT std::cout
 #define NULL_CHAR '\0'
 #define MEMCPY(x,y,z) _MEMCPY(x,y,z)
 #define MEMSET(x,y,z) _MEMSET(x,y,z)

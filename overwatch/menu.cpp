@@ -2,13 +2,28 @@
 #include "menu.hpp"
 #include "win/winapi.hpp"
 
+#include <set>
+
+void Menu::Game::list() {
+	auto listPaths = ptrManager->iterateGameData();
+	auto listGames = ptrManager->listGames(listPaths);
+	WaitPromptInput controlWait("== Added games in manager (Enter to continue...) ==", listGames);
+
+	try {
+		controlWait.start();
+	}
+	catch (const Exceptions::Exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+}
+
 void Menu::Game::add() {
 	std::list<STRING> menuList = {};
 	AlphabeticalInput controlAlpha("Set game name : ", menuList);
-	NumericalInput controlNum("Choose process name : ", menuList);
 	auto tmpGame = new Models::Game();
 	STRING str;
 
+	//Name Segment
 	while (1) {
 		try {
 			controlAlpha.start();
@@ -21,14 +36,21 @@ void Menu::Game::add() {
 		}
 	}
 
+	// Choosing process segment
 	while (1) {
 		try {
-			WinAPI::Process::getProcesses(menuList);
-			controlNum = NumericalInput("Choose process name : ", menuList);
+			WinAPI::Process::Types::mapProcessList listProc;
+			WinAPI::Process::getProcesses(listProc);
+			auto controlNum = NumericalInputMapFormat("Select game process name : ", listProc);
 
 			controlNum.start();
-			str = controlNum.getInputValue();
+			str = controlNum.getStringValue();
 			tmpGame->setProcessName(str);
+
+			Filesystem::pathT pathGame;
+			WinAPI::Process::getPathProcess(pathGame, std::stoi(controlNum.getInputValue()));
+			tmpGame->setPathToGame(pathGame);
+
 			break;
 		}
 		catch (const Exceptions::Exception& e) {
@@ -36,10 +58,57 @@ void Menu::Game::add() {
 		}
 	}
 
+	// Path to save files Segment
+	while (1) {
+		try {
+			auto controlPath = PathInput("Set the path to save files stored : ");
+
+			controlPath.start();
+			str = controlPath.getInputValue();
+			tmpGame->setPathToSaveFiles(str);
+			break;
+		}
+		catch (const Exceptions::Exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+
+	// Extensions of save file Segment
+	while (1) {
+		try {
+			std::set<Filesystem::pathT> setPaths;
+			std::list<STRING> listExtensions;
+
+			// For picking up the unique values
+			for (auto& it : std::filesystem::directory_iterator(tmpGame->getData().pathSave))
+				setPaths.insert(it.path().extension());
+			for (auto& it : setPaths)
+				listExtensions.push_back(it);
+
+			auto controlAlpha = NumericalInputMapFormat("What is the extension of save files? : ", listExtensions);
+			controlAlpha.start();
+			str = controlAlpha.getStringValue();
+			tmpGame->setExtensionOfSave(str);
+			break;
+		}
+		catch (const Exceptions::Exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+
+	try {
+		// This unload currently loaded game.
+		ptrManager->createGame(*tmpGame);
+		COUT << "Game " << tmpGame->getData().nameGame << " Added." << std::endl;
+	}
+	catch (const Exceptions::Exception& e) {
+		std::cout << e.what() << std::endl;
+	}
 }
 
 void Menu::Flows::game() {
-	std::list<STRING> menuList = { L"List games", L"Add game", L"Remove game", L"Exit" };
+	// TODO: L"" type is not following with STRING.
+	std::list<STRING> menuList = { CHAR_TO_WSTR("List games"), CHAR_TO_WSTR("Add game"), CHAR_TO_WSTR("Remove game"), CHAR_TO_WSTR("Exit") };
 	NumericalInput control("== Game Menu ==", menuList);
 	STRING str;
 
@@ -50,10 +119,10 @@ void Menu::Flows::game() {
 
 			switch (std::stoi(str)) {
 			case 1:
-				//GOTO LIST
+				Menu::Game::list();
 				break;
 			case 2:
-				//GOTO ADD
+				Menu::Game::add();
 				break;
 			case 3:
 				//GOTO REMOVE
@@ -73,35 +142,38 @@ void Menu::Flows::game() {
 
 int main(void) {
 	ptrManager = std::make_unique<Manager::Manager>();
-	std::list<STRING> menuList = { L"Game", L"Snapshot", L"Settings", L"Exit" };
+	std::list<STRING> menuList = { CHAR_TO_WSTR("Game"), CHAR_TO_WSTR("Snapshot"), CHAR_TO_WSTR("Settings"), CHAR_TO_WSTR("Exit") };
 	Menu::NumericalInput control("== Main Menu ==", menuList);
 	STRING str;
+	bool isExit = false;
 
 	//Test::CreateDummyGame(std::move(manager));
 
-	try {
-		control.start();
-		str = control.getInputValue();
+	while (!isExit) {
+		try {
+			control.start();
+			str = control.getInputValue();
 
-		switch (std::stoi(str)) {
-		case 1:
-			Menu::Game::add();
-			break;
-		case 2:
-			// GOTO SNAPSHOT
-			break;
-		case 3:
-			// GOTO SETTINGS
-			break;
-		case 4:
-			// GOTO EXIT
-			break;
-		default:
-			throw Exceptions::invalid_input("Unknown option");
+			switch (std::stoi(str)) {
+			case 1:
+				Menu::Flows::game();
+				break;
+			case 2:
+				// GOTO SNAPSHOT
+				break;
+			case 3:
+				// GOTO SETTINGS
+				break;
+			case 4:
+				isExit = true;
+				break;
+			default:
+				throw Exceptions::invalid_input("Unknown option");
+			}
 		}
-	}
-	catch (const Exceptions::Exception& e) {
-		std::cout << e.what() << std::endl;
+		catch (const Exceptions::Exception& e) {
+			std::cout << e.what() << std::endl;
+		}
 	}
 
 	return 0;
@@ -112,17 +184,9 @@ Menu::InputFormat::InputFormat(const std::string& title, const std::list<STRING>
 	this->title = title;
 }
 
-void Menu::InputFormat::start() {
-	_print();
-	_getInput();
-}
-
-const STRING Menu::InputFormat::getInputValue() {
-	return this->input;
-}
-
 void Menu::InputFormat::_determineError() {
-	if (!ISNUMBER(input)) throw Exceptions::invalid_input("Only Numerical value is allowed.");
+	if (!ISNUMBER(input))
+		throw Exceptions::invalid_input("Only Numerical value is allowed.");
 }
 
 void Menu::InputFormat::_print() {
@@ -134,7 +198,52 @@ void Menu::InputFormat::_print() {
 	std::cout << title << std::endl;
 }
 
-void Menu::InputFormat::_getInput() {
+void Menu::AlphabeticalInput::_determineError() {
+	if (!ISALPHA(input)) 
+		throw Exceptions::invalid_input("Only Alphabetical value is allowed.");
+	if (!ISFILENAMEAVAILABLE(input))
+		throw Exceptions::invalid_input("Game name includes invalid character(s).");
+}
+
+void Menu::NumericalInputMapFormat::_print()
+{
+	for (auto& it : selections) {
+		std::cout << it.first << ". ";
+		std::wcout << it.second << std::endl;
+	}
+	std::cout << title << std::endl;
+}
+
+void Menu::NumericalInputMapFormat::_determineError()
+{
+	if (!ISNUMBER(input))
+		throw Exceptions::invalid_input("Only Numerical value is allowed.");
+	if (selections.find(std::stoi(input)) == selections.end())
+		throw Exceptions::invalid_input("Unknown Option");
+}
+
+Menu::NumericalInputMapFormat::NumericalInputMapFormat(const std::string& title, const std::map<unsigned long long, STRING>& selections)
+{
+	this->title = title;
+	this->selections = selections;
+}
+
+Menu::NumericalInputMapFormat::NumericalInputMapFormat(const std::string& title, const std::list<STRING>& selections)
+{
+	unsigned long long i = 1;
+	this->title = title;
+	for (auto& it : selections) {
+		this->selections.insert({ i, it });
+	}
+}
+
+STRING Menu::NumericalInputMapFormat::getStringValue() const
+{
+	return this->selections.find(std::stoi(getInputValue()))->second;
+}
+
+void Menu::BaseInputFormat::_getInput()
+{
 	try {
 		std::getline(CIN, input);
 		_determineError();
@@ -147,6 +256,21 @@ void Menu::InputFormat::_getInput() {
 	}
 }
 
-void Menu::AlphabeticalInput::_determineError() {
-	if (!ISALPHA(input)) throw Exceptions::invalid_input("Only Alphabetical value is allowed.");
+void Menu::BaseInputFormat::start()
+{
+	_print();
+	_getInput();
+}
+
+const STRING Menu::BaseInputFormat::getInputValue() const
+{
+	return this->input;
+}
+
+void Menu::WaitPromptInput::_determineError() { }
+
+void Menu::PathInput::_determineError()
+{
+	if (!std::filesystem::exists(this->input))
+		throw Exceptions::invalid_input("Directory does not exists.");
 }

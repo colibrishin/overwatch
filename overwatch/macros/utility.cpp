@@ -52,6 +52,24 @@ void Utility::_String::_wcharNULLbreakCopy(wchar_t* DST, const wchar_t* SRC, uns
 	DST[SZ - 1] = L'\0';
 }
 
+std::wstring Utility::_String::_charToWchar(const char* target)
+{ 
+	size_t len;
+	_ASSERT(target != nullptr);
+	_ASSERT((len = strlen(target)) != 0);
+	++len;
+	const unsigned int buffer_size = 100;
+
+	wchar_t* conv = new wchar_t[len];
+
+	size_t tmpSize;
+	mbstowcs_s(&tmpSize, conv, len, target, len-1);
+	std::wstring returnStr = conv;
+	delete[] conv;
+
+	return returnStr;
+}
+
 const std::time_t Utility::getUnixTime() noexcept {
 	return std::time(nullptr);
 }
@@ -77,4 +95,26 @@ bool Utility::_String::_isStrEmpty(const char* s) {
 }
 bool Utility::_String::_isWStrEmpty(const wchar_t* s) {
 	return s[0] == L'\0';
+}
+
+bool Utility::_String::_isFileNameAvailableS(const std::string& s) {
+	if (!s.empty()) return false;
+	for (auto& it : s) {
+		if (it == '\\' || it == '/' || it == ':'
+			|| it == '*' || it == '?' || it == '\"'
+			|| it == '<' || it == '>' || it == '|')
+			return false;
+	}
+	return true;
+}
+
+bool Utility::_String::_isFileNameAvailableWS(const std::wstring& s) {
+	if (s.empty()) return false;
+	for (auto& it : s) {
+		if (it == L'\\' || it == L'\/' || it == L':'
+			|| it == L'*' || it == L'?' || it == L'\"'
+			|| it == L'<' || it == L'>' || it == L'|')
+			return false;
+	}
+	return true;
 }

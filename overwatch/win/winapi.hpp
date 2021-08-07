@@ -17,7 +17,7 @@ namespace WinAPI {
 	namespace Process {
 
 		namespace Types {
-			using mapProcessList = std::list<STRING>;
+			using mapProcessList = std::map<unsigned long long, STRING>;
 		}
 
 		namespace Constants {

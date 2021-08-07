@@ -11,10 +11,8 @@
 #include "../filesystem/fs.hpp"
 
 namespace Data {
-	using T_SNAPSHOT_SIZE_IN_MAP = unsigned 
-		
-		;
-	const static unsigned char MAX_SNAPSHOTS_IN_MAP = std::numeric_limits<T_SNAPSHOT_SIZE_IN_MAP>().max();
+	using T_SNAPSHOT_SIZE_IN_MAP = unsigned char;
+	const static T_SNAPSHOT_SIZE_IN_MAP MAX_SNAPSHOTS_IN_MAP = std::numeric_limits<T_SNAPSHOT_SIZE_IN_MAP>().max();
 
 	namespace Structures{
 		typedef struct Game {

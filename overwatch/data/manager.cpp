@@ -123,7 +123,7 @@ Manager::Manager::Manager() {
 	this->pathGames = iterateGameData();
 }
 
-const Filesystem::listPathT Manager::Manager::iterateGameData() noexcept {
+Filesystem::listPathT Manager::Manager::iterateGameData() noexcept {
 	auto list = dirGame.iteratePath();
 
 	for (auto it = list.begin(); it != list.end(); ++it) {
@@ -141,10 +141,12 @@ const Filesystem::listPathT Manager::Manager::iterateGameData() noexcept {
 
 bool Manager::Manager::isGameLoaded() { return this->currGame != nullptr; }
 
+// Need a function that load a game temporary
 void Manager::Manager::loadGame(Filesystem::pathT& path) {
 	try {
+		if(isGameLoaded())
+			this->unloadGame(Code::SAVE);
 		this->currGame = std::make_unique<GameLoaderT>(path, Loader::Code::OPEN);
-		this->unloadGame(Code::CLOSE);
 	}
 	catch (const Exceptions::Exception& e) {
 		std::cout << e.what() << std::endl;
@@ -186,4 +188,19 @@ void Manager::Manager::addSnapshot(const STRING& nameSnapshot, const Filesystem:
 	catch (const Exceptions::Exception& e) {
 		throw Exceptions::add_snapshot_failed(e.what());
 	}
+}
+
+std::list<STRING> Manager::Manager::listGames(Filesystem::listPathT& paths){
+	std::list<STRING> filenames;
+	
+	for (auto& it: paths) {
+		try {
+			// This unload currently loaded game.
+			loadGame(it);
+			filenames.push_back(this->currGame->getData().getValue().nameGame);
+		}
+		catch (...) { }
+	}
+
+	return filenames;
 }
