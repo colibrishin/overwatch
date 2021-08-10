@@ -77,11 +77,13 @@ namespace Menu {
 		void _determineError();
 	public:
 		WaitPromptInput(const std::string& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
+		WaitPromptInput(const std::string& title) : InputFormat(title, {}) { }
 	};
 
 	namespace Game {
 		void add();
 		void list();
+		void remove();
 	}
 
 	namespace Flows {

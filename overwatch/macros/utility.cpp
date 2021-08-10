@@ -111,7 +111,7 @@ bool Utility::_String::_isFileNameAvailableS(const std::string& s) {
 bool Utility::_String::_isFileNameAvailableWS(const std::wstring& s) {
 	if (s.empty()) return false;
 	for (auto& it : s) {
-		if (it == L'\\' || it == L'\/' || it == L':'
+		if (it == L'\\' || it == L'/' || it == L':'
 			|| it == L'*' || it == L'?' || it == L'\"'
 			|| it == L'<' || it == L'>' || it == L'|')
 			return false;

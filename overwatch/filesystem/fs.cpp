@@ -49,6 +49,15 @@ void Filesystem::Filesystem::copy(const pathT& ToPath) {
 	}
 }
 
+void Filesystem::Filesystem::remove() {
+	try {
+		std::filesystem::remove(this->path);
+	}
+	catch (const std::filesystem::filesystem_error& e) {
+		throw e;
+	}
+}
+
 const Filesystem::listPathT Filesystem::Filesystem::iteratePath() const noexcept{
 	listPathT rtn;
 	for (auto it : std::filesystem::directory_iterator(pathWithoutFilename()))

@@ -2,7 +2,37 @@
 #include "menu.hpp"
 #include "win/winapi.hpp"
 
+// WinAPI macro blocks the keyword max() -> std::streamsize
+#undef max
+
 #include <set>
+#include <numeric>
+
+void Menu::Game::remove() {
+	auto listPaths = ptrManager->iterateGameData();
+	auto listGames = ptrManager->listGames(listPaths);
+	STRING str;
+
+	if (listGames.empty()) {
+		WaitPromptInput controlWait("== No games to shown ==");
+		controlWait.start();
+		return;
+	}
+
+	NumericalInput controlNum("Choose game to remove : ", listGames);
+	try {
+		controlNum.start();
+		str = controlNum.getInputValue();
+
+		auto it = listPaths.begin();
+		std::advance(it, std::stoi(str) - 1);
+
+		// TODO : What if currGame is same as the one want to be removed?
+	}
+	catch (const Exceptions::Exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+}
 
 void Menu::Game::list() {
 	auto listPaths = ptrManager->iterateGameData();
@@ -81,7 +111,7 @@ void Menu::Game::add() {
 
 			// For picking up the unique values
 			for (auto& it : std::filesystem::directory_iterator(tmpGame->getData().pathSave))
-				setPaths.insert(it.path().extension());
+				if(!it.path().extension().empty()) setPaths.insert(it.path().extension());
 			for (auto& it : setPaths)
 				listExtensions.push_back(it);
 
@@ -97,7 +127,6 @@ void Menu::Game::add() {
 	}
 
 	try {
-		// This unload currently loaded game.
 		ptrManager->createGame(*tmpGame);
 		COUT << "Game " << tmpGame->getData().nameGame << " Added." << std::endl;
 	}
@@ -125,7 +154,7 @@ void Menu::Flows::game() {
 				Menu::Game::add();
 				break;
 			case 3:
-				//GOTO REMOVE
+				Menu::Game::remove();
 				break;
 			case 4:
 				//EXIT
@@ -234,6 +263,7 @@ Menu::NumericalInputMapFormat::NumericalInputMapFormat(const std::string& title,
 	this->title = title;
 	for (auto& it : selections) {
 		this->selections.insert({ i, it });
+		i++;
 	}
 }
 
@@ -267,7 +297,10 @@ const STRING Menu::BaseInputFormat::getInputValue() const
 	return this->input;
 }
 
-void Menu::WaitPromptInput::_determineError() { }
+void Menu::WaitPromptInput::_determineError() { 
+	// Not really good way to solve this
+	CIN.ignore(std::numeric_limits<std::streamsize>().max(), NULL_CHAR);
+}
 
 void Menu::PathInput::_determineError()
 {

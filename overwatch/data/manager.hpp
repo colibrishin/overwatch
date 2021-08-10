@@ -29,6 +29,7 @@ namespace Manager {
 
 	class Manager {
 	private:
+		ptrGameLoaderT tmpGame;
 		ptrGameLoaderT currGame;
 		ptrSnapshotLoaderT idxSnapshot;
 		ptrMapLoaderT currSnapshotMap;
@@ -47,15 +48,24 @@ namespace Manager {
 		Hash::SHA256 getSnapshotSaveFileHash(const Filesystem::pathT& pathToFile) const;
 		void createTmpFile(const Models::Game& data);
 		void createTmpFile(Models::Snapshot& snapshot);
+
+		bool isTmpGameLoaded() const noexcept;
+		void moveTmpToCurrent();
+		void moveCurrentToTmp();
 	public:
 		Manager();
 		Filesystem::listPathT iterateGameData() noexcept;
-		bool isGameLoaded();
+		bool isGameLoaded() const noexcept;
 		std::list<STRING> listGames(Filesystem::listPathT& path);
+
+		void loadTemporaryGame(Filesystem::pathT& path);
+		void unloadTemporaryGame();
+
 		void loadGame(Filesystem::pathT& path);
 		void unloadGame(const Code& typeOpen);
 		void createGame(const Models::Game& data);
 		void addSnapshot(const STRING& nameSnapshot, const Filesystem::pathT& pathSnapshot);
+		void removeGame(Filesystem::pathT& path);
 	};
 }
 

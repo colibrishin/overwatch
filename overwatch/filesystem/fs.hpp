@@ -31,6 +31,7 @@ namespace Filesystem {
 		const Code& getRequestType() const noexcept;
 		void move(const pathT& newPath);
 		void copy(const pathT& ToPath);
+		void remove();
 	};
 }
 

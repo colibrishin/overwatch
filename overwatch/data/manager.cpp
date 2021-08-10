@@ -139,9 +139,43 @@ Filesystem::listPathT Manager::Manager::iterateGameData() noexcept {
 	return list;
 }
 
-bool Manager::Manager::isGameLoaded() { return this->currGame != nullptr; }
+bool Manager::Manager::isGameLoaded() const noexcept { return this->currGame != nullptr; }
+bool Manager::Manager::isTmpGameLoaded() const noexcept { return this->tmpGame != nullptr; }
 
-// Need a function that load a game temporary
+void Manager::Manager::moveCurrentToTmp() {
+	if (!isGameLoaded())
+		throw Exceptions::programming_error("No game is opened.");
+	this->currGame = std::move(this->tmpGame);
+}
+
+void Manager::Manager::moveTmpToCurrent() {
+	if (!isTmpGameLoaded())
+		throw Exceptions::programming_error("No game is opened.");
+	this->tmpGame = std::move(this->currGame);
+}
+
+void Manager::Manager::loadTemporaryGame(Filesystem::pathT& path) {
+	try {
+		moveCurrentToTmp();
+		this->currGame = std::make_unique<GameLoaderT>(path, Loader::Code::OPEN);
+	}
+	catch (const Exceptions::Exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+}
+
+void Manager::Manager::unloadTemporaryGame() {
+	try {
+		this->currGame->writeData();
+		this->currGame.release();
+
+		moveTmpToCurrent();
+	}
+	catch (const Exceptions::Exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+}
+
 void Manager::Manager::loadGame(Filesystem::pathT& path) {
 	try {
 		if(isGameLoaded())
@@ -164,9 +198,12 @@ void Manager::Manager::unloadGame(const Code& typeOpen) {
 
 void Manager::Manager::createGame(const Models::Game& data) {
 	try {
-		if (isGameLoaded()) unloadGame(Code::SAVE);
+		if (isGameLoaded()) moveCurrentToTmp();
+
 		createTmpFile(data);
 		this->currGame->renameData(getGameLoaderFileName());
+
+		if (isTmpGameLoaded()) moveTmpToCurrent();
 	}
 	catch (const Exceptions::Exception& e) {
 		throw Exceptions::create_game_failed(e.what());
@@ -195,12 +232,26 @@ std::list<STRING> Manager::Manager::listGames(Filesystem::listPathT& paths){
 	
 	for (auto& it: paths) {
 		try {
-			// This unload currently loaded game.
-			loadGame(it);
+			if (isGameLoaded()) loadTemporaryGame(it);
+			else loadGame(it);
+
 			filenames.push_back(this->currGame->getData().getValue().nameGame);
 		}
 		catch (...) { }
 	}
 
 	return filenames;
+}
+
+
+void Manager::Manager::removeGame(Filesystem::pathT& path) {
+	// Possible security problem
+	try {
+		// TODO : See Menu::Game::remove()
+		Filesystem::Filesystem fs(path, Filesystem::Code::CHECK);
+		fs.remove();
+	}
+	catch (const Exceptions::Exception& e) {
+		throw e;
+	}
 }

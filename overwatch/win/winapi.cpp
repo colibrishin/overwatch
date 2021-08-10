@@ -44,7 +44,6 @@ void WinAPI::Process::getProcesses(WinAPI::Process::Types::mapProcessList& plist
 void WinAPI::Process::getPathProcess(std::filesystem::path& pathProc, const unsigned int& nPID) {
     DWORD PID = nPID;
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, PID);
-    // TODO : OpenProcess gives NULL Pointer even if program is running in administrator privilege
     if (hProcess == NULL) {
         throw Exceptions::winapi_error("Invalid hProcess Handle, this might have occurred due to lack of privilege or possibly program has been closed.");
     }
