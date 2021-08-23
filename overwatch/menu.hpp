@@ -18,6 +18,7 @@ namespace Menu {
 		virtual void _print() { }
 		void _getInput();
 	protected:
+		STRING title;
 		STRING input;
 
 		virtual void _determineError() { }
@@ -31,53 +32,49 @@ namespace Menu {
 	private:
 		void _print();
 	protected:
-		std::string title;
 		std::list<STRING> selections;
 		
 		virtual void _determineError();
 	public:
 		InputFormat() = delete;
-		InputFormat(const std::string& title, const std::list<STRING>& selections);
+		InputFormat(const STRING& title, const std::list<STRING>& selections);
 	};
 
 	class NumericalInputMapFormat : public BaseInputFormat{
 	private:
 		void _print();
 	protected:
-		std::string title;
 		std::map<unsigned long long, STRING> selections;
 
 		virtual void _determineError();
 	public:
 		NumericalInputMapFormat() = delete;
-		NumericalInputMapFormat(const std::string& title, const std::map<unsigned long long, STRING>& selections);
-		NumericalInputMapFormat(const std::string& title, const std::list<STRING>& selections);
+		NumericalInputMapFormat(const STRING& title, const std::map<unsigned long long, STRING>& selections);
+		NumericalInputMapFormat(const STRING& title, const std::list<STRING>& selections);
 		STRING getStringValue() const;
 	};
 
 	class NumericalInput : public InputFormat {
 	public:
-		NumericalInput(const std::string& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
+		NumericalInput(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
 	};
 	class AlphabeticalInput : public InputFormat {
 	public:
-		AlphabeticalInput(const std::string& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
+		AlphabeticalInput(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
 	private:
 		void _determineError();
 	};
 	class PathInput : public InputFormat {
 	public:
-		PathInput(const std::string& title) : InputFormat(title, {}) {}
+		PathInput(const STRING& title) : InputFormat(title, {}) {}
 	private:
 		void _determineError();
 	};
 
 	class WaitPromptInput : public InputFormat {
-	private:
-		void _determineError();
 	public:
-		WaitPromptInput(const std::string& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
-		WaitPromptInput(const std::string& title) : InputFormat(title, {}) { }
+		WaitPromptInput(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
+		WaitPromptInput(const STRING& title) : InputFormat(title, {}) { }
 	};
 
 	namespace Game {
@@ -88,6 +85,14 @@ namespace Menu {
 
 	namespace Flows {
 		void game();
+		void snapshot();
+	}
+
+	namespace Snapshot {
+		void select_game();
+		void list();
+		//void add();
+		//void remove();
 	}
 }
 

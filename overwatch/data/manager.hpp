@@ -66,6 +66,9 @@ namespace Manager {
 		void createGame(const Models::Game& data);
 		void addSnapshot(const STRING& nameSnapshot, const Filesystem::pathT& pathSnapshot);
 		void removeGame(Filesystem::pathT& path);
+
+		const Models::Game getCurrentGame();
+		STRING getCurrentGameName() const;
 	};
 }
 

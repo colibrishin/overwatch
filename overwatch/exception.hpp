@@ -64,7 +64,11 @@ namespace Exceptions {
 		winapi_error() = delete;
 		winapi_error(const char* detail) : Exception("WinAPI Error", detail) {}
 	};
-	
+	class no_game_loaded : public Exception {
+	public:
+		no_game_loaded() = delete;
+		no_game_loaded(const char* detail) : Exception("No game has been selected", detail) {}
+	};
 }
 
 

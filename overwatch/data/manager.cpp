@@ -8,7 +8,7 @@ STRING Manager::Manager::getTmpFileName(const std::time_t timeCreated, const Has
 }
 
 Filesystem::pathT Manager::Manager::getGameLoaderFileName() const {
-	if (this->currGame == nullptr) throw Exceptions::programming_error("Game is not Loaded");
+	if (this->currGame == nullptr) throw Exceptions::no_game_loaded("");
 	Filesystem::pathT pathFile = GAME_DIRECTORY;
 	auto hashGame = this->currGame->getHash().getString();
 	auto nameGame = this->currGame->getData().getValue().nameGame;
@@ -18,7 +18,7 @@ Filesystem::pathT Manager::Manager::getGameLoaderFileName() const {
 }
 
 Filesystem::pathT Manager::Manager::getSnapshotLoaderFileName() const {
-	if (this->idxSnapshot == nullptr) throw Exceptions::programming_error("Snapshot is not Loaded");
+	if (this->idxSnapshot == nullptr) throw Exceptions::no_game_loaded("");
 	Filesystem::pathT pathFile = SNAPSHOT_DIRECTORY;
 	auto hashSnapshot = this->idxSnapshot->getHash().getString();
 	auto nameSnapshot = this->idxSnapshot->getData().getValue().nameSave;
@@ -144,13 +144,13 @@ bool Manager::Manager::isTmpGameLoaded() const noexcept { return this->tmpGame !
 
 void Manager::Manager::moveCurrentToTmp() {
 	if (!isGameLoaded())
-		throw Exceptions::programming_error("No game is opened.");
+		throw Exceptions::no_game_loaded("");
 	this->currGame = std::move(this->tmpGame);
 }
 
 void Manager::Manager::moveTmpToCurrent() {
 	if (!isTmpGameLoaded())
-		throw Exceptions::programming_error("No game is opened.");
+		throw Exceptions::no_game_loaded("");
 	this->tmpGame = std::move(this->currGame);
 }
 
@@ -161,6 +161,23 @@ void Manager::Manager::loadTemporaryGame(Filesystem::pathT& path) {
 	}
 	catch (const Exceptions::Exception& e) {
 		std::cout << e.what() << std::endl;
+	}
+}
+
+STRING Manager::Manager::getCurrentGameName() const {
+	if (!isGameLoaded())
+		throw Exceptions::no_game_loaded("");
+
+	STRING nameGame = this->currGame->getData().getValue().nameGame;
+	return nameGame;
+}
+
+const Models::Game Manager::Manager::getCurrentGame() {
+	if (this->currGame != nullptr) {
+		return Models::Game::Game(currGame->getData().getValue());
+	}
+	else {
+		throw Exceptions::no_game_loaded("");
 	}
 }
 
@@ -189,7 +206,7 @@ void Manager::Manager::loadGame(Filesystem::pathT& path) {
 
 void Manager::Manager::unloadGame(const Code& typeOpen) {
 	if (!isGameLoaded())
-		throw Exceptions::programming_error("No game is opened.");
+		throw Exceptions::no_game_loaded("");
 
 	if (typeOpen == Code::SAVE)
 		this->currGame->writeData();
@@ -212,9 +229,9 @@ void Manager::Manager::createGame(const Models::Game& data) {
 
 void Manager::Manager::addSnapshot(const STRING& nameSnapshot, const Filesystem::pathT& pathSnapshot) {
 	if (this->currGame == nullptr)
-		throw Exceptions::programming_error("No game is opened.");
+		throw Exceptions::no_game_loaded("");
 	try {
-		auto snapshot = new Models::Snapshot(nameSnapshot, pathSnapshot);
+		auto snapshot = new Models::Snapshot();
 		createTmpFile(*snapshot);
 		this->idxSnapshot->renameData(getSnapshotLoaderFileName());
 
@@ -247,7 +264,17 @@ std::list<STRING> Manager::Manager::listGames(Filesystem::listPathT& paths){
 void Manager::Manager::removeGame(Filesystem::pathT& path) {
 	// Possible security problem
 	try {
-		// TODO : See Menu::Game::remove()
+		loadTemporaryGame(path);
+		if (this->currGame->getHash() == this->tmpGame->getHash()) {
+			unloadGame(Code::CLOSE);
+			moveTmpToCurrent();
+			unloadGame(Code::CLOSE);
+		}
+		else {
+			unloadGame(Code::CLOSE);
+			moveTmpToCurrent();
+		}
+
 		Filesystem::Filesystem fs(path, Filesystem::Code::CHECK);
 		fs.remove();
 	}
