@@ -173,12 +173,10 @@ STRING Manager::Manager::getCurrentGameName() const {
 }
 
 const Models::Game Manager::Manager::getCurrentGame() {
-	if (this->currGame != nullptr) {
-		return Models::Game::Game(currGame->getData().getValue());
-	}
-	else {
+	if (!isGameLoaded()) {
 		throw Exceptions::no_game_loaded("");
 	}
+	return Models::Game::Game(currGame->getData().getValue());
 }
 
 void Manager::Manager::unloadTemporaryGame() {
@@ -231,7 +229,7 @@ void Manager::Manager::addSnapshot(const STRING& nameSnapshot, const Filesystem:
 	if (this->currGame == nullptr)
 		throw Exceptions::no_game_loaded("");
 	try {
-		auto snapshot = new Models::Snapshot();
+		auto snapshot = new Models::Snapshot(nameSnapshot, 0, nullptr, nullptr, pathSnapshot, L"");
 		createTmpFile(*snapshot);
 		this->idxSnapshot->renameData(getSnapshotLoaderFileName());
 
