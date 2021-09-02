@@ -15,66 +15,105 @@ namespace Menu {
 
 	class BaseInputFormat {
 	private:
-		virtual void _print() { }
 		void _getInput();
 	protected:
+		virtual void _print() {
+			std::cout << "baseinput";
+			return;
+		}
 		STRING title;
 		STRING input;
 
 		virtual void _determineError() { }
 	public:
 		BaseInputFormat() {};
+		BaseInputFormat(const STRING& title) { this->title = title; }
 		void start();
 		const STRING getInputValue() const;
 	};
 
+	template <class T>
 	class InputFormat : public BaseInputFormat {
-	private:
-		void _print();
 	protected:
-		std::list<STRING> selections;
+		virtual void _print() { 
+			std::cout << "input";
+			return;
+		}
+		T selections;
 		
-		virtual void _determineError();
+		virtual void _determineError() {
+			if (!ISNUMBER(input))
+				throw Exceptions::invalid_input("Only Numerical value is allowed.");
+			if (this->selections.size() < std::stoi(input))
+				throw Exceptions::invalid_input("Unknown Option.");
+		}
 	public:
 		InputFormat() = delete;
-		InputFormat(const STRING& title, const std::list<STRING>& selections);
+		InputFormat(const STRING& title, const T& selections) : BaseInputFormat(title) { this->selections = selections; }
 	};
 
-	class NumericalInputMapFormat : public BaseInputFormat{
+	template <class T, class U>
+	class NumericalInputMapFormat : public InputFormat<std::map<T, U>> {
 	private:
-		void _print();
+		virtual void _print() {
+			for (auto& it : this->selections) {
+				std::cout << it.first << ". ";
+				COUT << it.second << std::endl;
+			}
+			COUT << this->title << std::endl;
+		}
 	protected:
-		std::map<unsigned long long, STRING> selections;
-
-		virtual void _determineError();
+		virtual void _determineError() {
+			if (!ISNUMBER(this->input))
+				throw Exceptions::invalid_input("Only Numerical value is allowed.");
+			if (this->selections.find(std::stoi(this->input)) == this->selections.end())
+				throw Exceptions::invalid_input("Unknown Option");
+		}
 	public:
 		NumericalInputMapFormat() = delete;
-		NumericalInputMapFormat(const STRING& title, const std::map<unsigned long long, STRING>& selections);
-		NumericalInputMapFormat(const STRING& title, const std::list<STRING>& selections);
-		STRING getStringValue() const;
+		NumericalInputMapFormat(const STRING& title, const std::map<T, U>& selections) : InputFormat<std::map<T, U>>(title, selections){ }
+		STRING getStringValue() const {
+			return this->selections.find(std::stoi(this->getInputValue()))->second;
+		}
 	};
 
-	class NumericalInput : public InputFormat {
+	class ListInputFormat : public InputFormat<std::list<STRING>> {
+	private:
+		virtual void _print() {
+			unsigned int i = 0;
+			for (auto& it : selections) {
+				std::cout << ++i << ". ";
+				COUT << it << std::endl;
+			}
+			COUT << title << std::endl;
+		}
 	public:
-		NumericalInput(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
+		ListInputFormat(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
 	};
-	class AlphabeticalInput : public InputFormat {
+
+	class NumericalInput : public ListInputFormat {
 	public:
-		AlphabeticalInput(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
+		NumericalInput(const STRING& title, const std::list<STRING>& selections) : ListInputFormat(title, selections) { }
+	};
+
+	class AlphabeticalInput : public ListInputFormat {
+	public:
+		AlphabeticalInput(const STRING& title, const std::list<STRING>& selections) : ListInputFormat(title, selections) { }
 	private:
 		void _determineError();
 	};
-	class PathInput : public InputFormat {
+
+	class PathInput : public ListInputFormat {
 	public:
-		PathInput(const STRING& title) : InputFormat(title, {}) {}
+		PathInput(const STRING& title) : ListInputFormat(title, {}) { }
 	private:
 		void _determineError();
 	};
 
-	class WaitPromptInput : public InputFormat {
+	class WaitPromptInput : public ListInputFormat {
 	public:
-		WaitPromptInput(const STRING& title, const std::list<STRING>& selections) : InputFormat(title, selections) { }
-		WaitPromptInput(const STRING& title) : InputFormat(title, {}) { }
+		WaitPromptInput(const STRING& title, const std::list<STRING>& selections) : ListInputFormat(title, selections) { }
+		WaitPromptInput(const STRING& title) : ListInputFormat(title, {}) { }
 	};
 
 	namespace Game {
@@ -91,8 +130,9 @@ namespace Menu {
 	namespace Snapshot {
 		void select_game();
 		void list();
-		//void add();
-		//void remove();
+		void add();
+		void edit();
+		void remove();
 	}
 }
 

@@ -8,17 +8,73 @@
 #include <set>
 #include <numeric>
 
-void Menu::Snapshot::list() {
-	auto listPaths = ptrManager->iterateGameData();
-	auto listGames = ptrManager->listGames(listPaths);
-	WaitPromptInput controlWait(CHAR_TO_WSTR("== Snapshot lists (Enter to Continue...) =="), listGames);
+void Menu::Snapshot::remove() {
 
-	if (!ptrManager->isGameLoaded()) {
-		std::cout << Exceptions::no_game_loaded("").what() << std::endl;
-		return;
+}
+
+void Menu::Snapshot::edit() {
+
+}
+
+void Menu::Snapshot::add() {
+	auto tmpSnapshot = new Models::Snapshot();
+	STRING str;
+
+	//Name Segment
+	while (1) {
+		try {
+			AlphabeticalInput controlName(CHAR_TO_WSTR("Set Snapshot name : "), {});
+
+			controlName.start();
+			str = controlName.getInputValue();
+			tmpSnapshot->setName(str);
+			break;
+		}
+		catch (const Exceptions::Exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+	}
+
+	// Path to save files Segment
+	while (1) {
+		try {
+			auto controlPath = PathInput(CHAR_TO_WSTR("Where is the save file? : "));
+
+			controlPath.start();
+			Filesystem::pathT path = controlPath.getInputValue();
+
+			tmpSnapshot->setPathToFile(path);
+			break;
+		}
+		catch (const Exceptions::Exception& e) {
+			std::cout << e.what() << std::endl;
+		}
 	}
 
 	try {
+		ptrManager->addSnapshot(*tmpSnapshot);
+		COUT << "Snapshot " << tmpSnapshot->getData().nameSave << " Added to " << ptrManager->getCurrentGame().getData().nameGame << "." << std::endl;
+	}
+	catch (const Exceptions::Exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+}
+
+void Menu::Snapshot::list() {
+	try {
+		if (!ptrManager->isGameLoaded()) {
+			throw Exceptions::no_game_loaded("");
+		}
+
+		Models::MiniSnapshotMapT mapSnapshot = ptrManager->listSnapshots();
+		std::list<STRING> nameSnapshots;
+
+		for (auto& it : mapSnapshot) {
+			nameSnapshots.push_back(it.second.nameSave);
+		}
+
+		WaitPromptInput controlWait(CHAR_TO_WSTR("== Snapshot lists (Enter to Continue...) =="), nameSnapshots);
+
 		controlWait.start();
 	}
 	catch (const Exceptions::Exception& e) {
@@ -27,9 +83,8 @@ void Menu::Snapshot::list() {
 }
 
 void Menu::Snapshot::select_game() {
-	auto listPaths = ptrManager->iterateGameData();
-	auto listGames = ptrManager->listGames(listPaths);
-	NumericalInput controlNum(CHAR_TO_WSTR("== Choose game to change snapshot status =="), listGames);
+	auto listGames = ptrManager->listGames();
+	NumericalInput controlNum(CHAR_TO_WSTR("== Choose game to change snapshot status =="), listGames.first);
 	STRING str;
 	unsigned long long numChosen;
 
@@ -37,15 +92,16 @@ void Menu::Snapshot::select_game() {
 		try {
 			controlNum.start();
 			str = controlNum.getInputValue();
-			auto it = listPaths.begin();
+			auto it = listGames.second.begin();
 
 			numChosen = std::stoi(str);
-			if (numChosen < 0 || numChosen > listPaths.size())
+			if (numChosen < 0 || numChosen > listGames.second.size())
 				throw Exceptions::invalid_input("Unknown Option.");
-			std::advance(it, numChosen + 1);
+			std::advance(it, numChosen - 1);
 
 			ptrManager->loadGame(*it);
 			COUT << "Game " << ptrManager->getCurrentGameName() << " is Loaded." << std::endl;
+			break;
 		}
 		catch (const Exceptions::Exception& e) {
 			std::cout << e.what() << std::endl;
@@ -54,16 +110,26 @@ void Menu::Snapshot::select_game() {
 }
 
 void Menu::Flows::snapshot() {
-	std::list<STRING> menuList = { CHAR_TO_WSTR("Select game"), CHAR_TO_WSTR("List snapshots"), CHAR_TO_WSTR("Add snapshot"), CHAR_TO_WSTR("Remove snapshot"), CHAR_TO_WSTR("Exit") };
+	std::list<STRING> menuList = { 
+		CHAR_TO_WSTR("Select game"), 
+		CHAR_TO_WSTR("List snapshots"), 
+		CHAR_TO_WSTR("Add snapshot"),
+		CHAR_TO_WSTR("Edit Snapshot"),
+		CHAR_TO_WSTR("Remove snapshot"),
+		CHAR_TO_WSTR("Exit") 
+	};
+
 	STRING str;
 
 	while (1) {
 		try {
-			STRING nameGame = CHAR_TO_WSTR("None");
+			STRING nameGame;
 			try {
-				STRING nameGame = ptrManager->getCurrentGameName();
+				nameGame = ptrManager->getCurrentGameName();
 			}
-			catch (...) {}
+			catch (...) {
+				nameGame = CHAR_TO_WSTR("None");
+			}
 
 			NumericalInput control(CHAR_TO_WSTR("== Snapshot Menu ==\n Current Game : ") + nameGame, menuList);
 
@@ -78,12 +144,15 @@ void Menu::Flows::snapshot() {
 				Menu::Snapshot::list();
 				break;
 			case 3:
-				//Menu::Snapshot::add();
+				Menu::Snapshot::add();
 				break;
 			case 4:
-				//Menu::Snapshot::remove();
+				Menu::Snapshot::edit();
 				break;
 			case 5:
+				Menu::Snapshot::remove();
+				break;
+			case 6:
 				return;
 			default:
 				throw Exceptions::invalid_input("Unknown option");
@@ -96,31 +165,30 @@ void Menu::Flows::snapshot() {
 }
 
 void Menu::Game::remove() {
-	auto listPaths = ptrManager->iterateGameData();
-	auto listGames = ptrManager->listGames(listPaths);
+	auto listGames = ptrManager->listGames();
 	STRING str;
 
-	if (listGames.empty()) {
+	if (listGames.first.empty()) {
 		WaitPromptInput controlWait(CHAR_TO_WSTR("== No games to shown =="));
 		controlWait.start();
 		return;
 	}
 
 	while (1) {
-		NumericalInput controlNum(CHAR_TO_WSTR("Choose game to remove : "), listGames);
+		NumericalInput controlNum(CHAR_TO_WSTR("Choose game to remove : "), listGames.first);
 		try {
 			controlNum.start();
 			str = controlNum.getInputValue();
 			auto numChosen = std::stoi(str);
 
-			auto it = listPaths.begin();
-			if (numChosen < 0 || numChosen > listPaths.size())
-				throw Exceptions::invalid_input("Unknown Option.");
-			std::advance(it, numChosen - 1);
+			auto itName = listGames.first.begin();
+			auto itPath = listGames.second.begin();
 
-			STRING nameGame = ptrManager->getCurrentGameName();
-			ptrManager->removeGame(*it);
-			COUT << nameGame << " has removed from manager." << std::endl;
+			std::advance(itPath, numChosen - 1);
+			std::advance(itName, numChosen - 1);
+
+			ptrManager->removeGame(*itPath);
+			COUT << *itName << " has removed from manager." << std::endl;
 
 			return;
 		}
@@ -131,9 +199,8 @@ void Menu::Game::remove() {
 }
 
 void Menu::Game::list() {
-	auto listPaths = ptrManager->iterateGameData();
-	auto listGames = ptrManager->listGames(listPaths);
-	WaitPromptInput controlWait(CHAR_TO_WSTR("== Added games in manager (Enter to continue...) =="), listGames);
+	auto listGames = ptrManager->listGames();
+	WaitPromptInput controlWait(CHAR_TO_WSTR("== Added games in manager (Enter to continue...) =="), listGames.first);
 
 	try {
 		controlWait.start();
@@ -144,16 +211,15 @@ void Menu::Game::list() {
 }
 
 void Menu::Game::add() {
-	std::list<STRING> menuList = {};
-	AlphabeticalInput controlAlpha(CHAR_TO_WSTR("Set game name : "), menuList);
+	AlphabeticalInput controlGameName(CHAR_TO_WSTR("Set game name : "), {});
 	auto tmpGame = new Models::Game();
 	STRING str;
 
 	//Name Segment
 	while (1) {
 		try {
-			controlAlpha.start();
-			str = controlAlpha.getInputValue();
+			controlGameName.start();
+			str = controlGameName.getInputValue();
 			tmpGame->setName(str);
 			break;
 		}
@@ -167,14 +233,14 @@ void Menu::Game::add() {
 		try {
 			WinAPI::Process::Types::mapProcessList listProc;
 			WinAPI::Process::getProcesses(listProc);
-			auto controlNum = NumericalInputMapFormat(CHAR_TO_WSTR("Select game process name : "), listProc);
+			auto controlProcess = NumericalInputMapFormat(CHAR_TO_WSTR("Select game process name : "), listProc);
 
-			controlNum.start();
-			str = controlNum.getStringValue();
+			controlProcess.start();
+			str = controlProcess.getStringValue();
 			tmpGame->setProcessName(str);
 
 			Filesystem::pathT pathGame;
-			WinAPI::Process::getPathProcess(pathGame, std::stoi(controlNum.getInputValue()));
+			WinAPI::Process::getPathProcess(pathGame, std::stoi(controlProcess.getInputValue()));
 			tmpGame->setPathToGame(pathGame);
 
 			break;
@@ -211,10 +277,14 @@ void Menu::Game::add() {
 			for (auto& it : setPaths)
 				listExtensions.push_back(it);
 
-			auto controlAlpha = NumericalInputMapFormat(CHAR_TO_WSTR("What is the extension of save files? : "), listExtensions);
-			controlAlpha.start();
-			str = controlAlpha.getStringValue();
-			tmpGame->setExtensionOfSave(str);
+			auto controlExtension = NumericalInput(CHAR_TO_WSTR("What is the extension of save files? : "), listExtensions);
+			controlExtension.start();
+			str = controlExtension.getInputValue();
+
+			auto it = listExtensions.begin();
+			std::advance(it, std::stoi(str) - 1);
+
+			tmpGame->setExtensionOfSave(*it);
 			break;
 		}
 		catch (const Exceptions::Exception& e) {
@@ -232,7 +302,13 @@ void Menu::Game::add() {
 }
 
 void Menu::Flows::game() {
-	std::list<STRING> menuList = { CHAR_TO_WSTR("List games"), CHAR_TO_WSTR("Add game"), CHAR_TO_WSTR("Remove game"), CHAR_TO_WSTR("Exit") };
+	std::list<STRING> menuList = { 
+		CHAR_TO_WSTR("List games"), 
+		CHAR_TO_WSTR("Add game"), 
+		CHAR_TO_WSTR("Remove game"), 
+		CHAR_TO_WSTR("Exit") 
+	};
+
 	NumericalInput control(CHAR_TO_WSTR("== Game Menu =="), menuList);
 	STRING str;
 
@@ -265,7 +341,13 @@ void Menu::Flows::game() {
 
 int main(void) {
 	ptrManager = std::make_unique<Manager::Manager>();
-	std::list<STRING> menuList = { CHAR_TO_WSTR("Game"), CHAR_TO_WSTR("Snapshot"), CHAR_TO_WSTR("Settings"), CHAR_TO_WSTR("Exit") };
+	std::list<STRING> menuList = { 
+		CHAR_TO_WSTR("Game"), 
+		CHAR_TO_WSTR("Snapshot"), 
+		CHAR_TO_WSTR("Settings"), 
+		CHAR_TO_WSTR("Exit") 
+	};
+
 	Menu::NumericalInput control(CHAR_TO_WSTR("== Main Menu =="), menuList);
 	STRING str;
 	bool isExit = false;
@@ -300,68 +382,11 @@ int main(void) {
 	return 0;
 }
 
-Menu::InputFormat::InputFormat(const STRING& title, const std::list<STRING>& selections) {
-	this->selections = selections;
-	this->title = title;
-}
-
-void Menu::InputFormat::_determineError() {
-	if (!ISNUMBER(input))
-		throw Exceptions::invalid_input("Only Numerical value is allowed.");
-}
-
-void Menu::InputFormat::_print() {
-	unsigned int i = 0;
-	for (auto& it : selections) {
-		std::cout << ++i << ". ";
-		COUT << it << std::endl;
-	}
-	COUT << title << std::endl;
-}
-
 void Menu::AlphabeticalInput::_determineError() {
 	if (!ISALPHA(input)) 
 		throw Exceptions::invalid_input("Only Alphabetical value is allowed.");
 	if (!ISFILENAMEAVAILABLE(input))
 		throw Exceptions::invalid_input("Game name includes invalid character(s).");
-}
-
-void Menu::NumericalInputMapFormat::_print()
-{
-	for (auto& it : selections) {
-		std::cout << it.first << ". ";
-		COUT << it.second << std::endl;
-	}
-	COUT << title << std::endl;
-}
-
-void Menu::NumericalInputMapFormat::_determineError()
-{
-	if (!ISNUMBER(input))
-		throw Exceptions::invalid_input("Only Numerical value is allowed.");
-	if (selections.find(std::stoi(input)) == selections.end())
-		throw Exceptions::invalid_input("Unknown Option");
-}
-
-Menu::NumericalInputMapFormat::NumericalInputMapFormat(const STRING& title, const std::map<unsigned long long, STRING>& selections)
-{
-	this->title = title;
-	this->selections = selections;
-}
-
-Menu::NumericalInputMapFormat::NumericalInputMapFormat(const STRING& title, const std::list<STRING>& selections)
-{
-	unsigned long long i = 1;
-	this->title = title;
-	for (auto& it : selections) {
-		this->selections.insert({ i, it });
-		i++;
-	}
-}
-
-STRING Menu::NumericalInputMapFormat::getStringValue() const
-{
-	return this->selections.find(std::stoi(getInputValue()))->second;
 }
 
 void Menu::BaseInputFormat::_getInput()

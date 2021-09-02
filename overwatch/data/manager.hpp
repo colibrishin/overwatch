@@ -19,6 +19,12 @@ namespace Manager {
 		CLOSE
 	};
 
+	constexpr const std::streamsize GAMEDATASIZE = sizeof(Data::Structures::Game);
+	constexpr const std::streamsize SNAPSHOTDATASIZE = sizeof(Data::Structures::Snapshot);
+	constexpr const std::streamsize MAPDATASIZE = sizeof(Data::Structures::Map);
+
+	using NameAndPathListT = std::pair<std::list<STRING>, std::list<Filesystem::pathT>>;
+
 	using GameLoaderT = Loader::Loader<Data::Structures::Game>;
 	using SnapshotLoaderT = Loader::Loader<Data::Structures::Snapshot>;
 	using MapLoaderT = Loader::Loader<Data::Structures::Map>;
@@ -31,14 +37,16 @@ namespace Manager {
 	private:
 		ptrGameLoaderT tmpGame;
 		ptrGameLoaderT currGame;
-		ptrSnapshotLoaderT idxSnapshot;
+		ptrMapLoaderT tmpSnapshotMap;
 		ptrMapLoaderT currSnapshotMap;
 
-		Filesystem::listPathT pathGames;
-		std::map<STRING, Filesystem::pathT> mapSnapshots;
+		ptrSnapshotLoaderT currSnapshot;
+
+		Models::MiniSnapshotMapT mapSnapshots;
 
 		Filesystem::Filesystem dirGame;
 		Filesystem::Filesystem dirSnapshot;
+		Filesystem::Filesystem dirSnapshotCopy;
 		
 
 		STRING getTmpFileName(const std::time_t timeCreated, const Hash::SHA256 hash) const noexcept;
@@ -46,6 +54,8 @@ namespace Manager {
 		Filesystem::pathT getSnapshotLoaderFileName() const;
 		Filesystem::pathT getSnapshotSaveFileCopyFileName(const Data::Structures::Snapshot& data) const;
 		Hash::SHA256 getSnapshotSaveFileHash(const Filesystem::pathT& pathToFile) const;
+		
+		void createTmpFile(const Models::Map& data);
 		void createTmpFile(const Models::Game& data);
 		void createTmpFile(Models::Snapshot& snapshot);
 
@@ -53,10 +63,12 @@ namespace Manager {
 		void moveTmpToCurrent();
 		void moveCurrentToTmp();
 	public:
+		~Manager();
 		Manager();
-		Filesystem::listPathT iterateGameData() noexcept;
+		Filesystem::listPathT iterateGamePaths() noexcept;
+		Filesystem::listPathT iterateValidGameData() noexcept;
 		bool isGameLoaded() const noexcept;
-		std::list<STRING> listGames(Filesystem::listPathT& path);
+		NameAndPathListT listGames();
 
 		void loadTemporaryGame(Filesystem::pathT& path);
 		void unloadTemporaryGame();
@@ -64,8 +76,15 @@ namespace Manager {
 		void loadGame(Filesystem::pathT& path);
 		void unloadGame(const Code& typeOpen);
 		void createGame(const Models::Game& data);
-		void addSnapshot(const STRING& nameSnapshot, const Filesystem::pathT& pathSnapshot);
 		void removeGame(Filesystem::pathT& path);
+
+		void loadMap(Filesystem::pathT& path);
+		void unloadMap();
+		void updateMap() const;
+
+		const Models::MiniSnapshotMapT& listSnapshots() const;
+		void addSnapshot(Models::Snapshot& data);
+		void appendCurrentSnapshotToMap();
 
 		const Models::Game getCurrentGame();
 		STRING getCurrentGameName() const;

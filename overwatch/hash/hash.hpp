@@ -2,6 +2,7 @@
 #define HASH_H
 
 #include <string>
+#include <algorithm>
 #include "sha256.h"
 
 namespace Hash {
@@ -34,6 +35,15 @@ namespace Hash {
 
 		bool operator==(const SHA256& second) {
 			return compareHash(this->data, second.data);
+		}
+
+		bool operator<(const SHA256& second) const {
+			for (int i = 0; i < SHA256_HASH_LENGTH; ++i) {
+				if (data[i] < second.data[i]) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		const std::string getString() const noexcept{

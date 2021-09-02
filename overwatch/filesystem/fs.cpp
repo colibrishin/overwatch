@@ -9,7 +9,7 @@ Filesystem::Filesystem::Filesystem(const pathT& pathFS, const Code& codeChkOrCre
 	this->requestCode = codeChkOrCreate;
 
 	try {
-		if(codeChkOrCreate == Code::CHECK)
+		if (codeChkOrCreate == Code::CHECK)
 			std::filesystem::exists(pathWithoutFilename());
 		if (codeChkOrCreate == Code::CREATE)
 			std::filesystem::create_directories(pathWithoutFilename());
@@ -60,7 +60,7 @@ void Filesystem::Filesystem::remove() {
 
 const Filesystem::listPathT Filesystem::Filesystem::iteratePath() const noexcept{
 	listPathT rtn;
-	for (auto it : std::filesystem::directory_iterator(pathWithoutFilename()))
+	for (auto& it : std::filesystem::directory_iterator(pathWithoutFilename()))
 		rtn.push_back(it.path());
 	return rtn;
 }

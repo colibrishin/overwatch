@@ -14,6 +14,71 @@ namespace Data {
 	using T_SNAPSHOT_SIZE_IN_MAP = unsigned char;
 	const static T_SNAPSHOT_SIZE_IN_MAP MAX_SNAPSHOTS_IN_MAP = std::numeric_limits<T_SNAPSHOT_SIZE_IN_MAP>().max();
 
+	namespace Form {
+		template<class T>
+		struct Hashable_Data {
+		private:
+			Hash::SHA256 hash;
+			T data;
+
+			void _COPY(const Hashable_Data<T>& _ref) noexcept {
+				this->hash = _ref.hash;
+				this->data = _ref.data;
+			}
+
+			void _CLEAR() noexcept {
+				this->hash.clear();
+				this->data._CLEAR();
+			}
+
+			void _UPDATE_HASH() noexcept {
+				hash = Hash::SHA256(reinterpret_cast<char*>(&data));
+			}
+
+		public:
+			Hashable_Data() {
+				_CLEAR();
+			}
+
+			Hashable_Data(const Hashable_Data<T>& _ref) {
+				_COPY(_ref);
+			}
+
+			Hashable_Data(const T& _ref) {
+				this->data = _ref;
+				_UPDATE_HASH();
+			}
+
+			Hashable_Data<T>& operator=(const Hashable_Data<T>& _ref) {
+				_COPY(_ref);
+				return *this;
+			}
+
+			void setValue(const T& _NewData) noexcept {
+				memcpy(&this->data, &_NewData, sizeof(this->data));
+				_UPDATE_HASH();
+			}
+
+			void clearValue() noexcept {
+				memcpy(&this->data, 0, sizeof(T));
+				_UPDATE_HASH();
+			}
+
+			bool validateValue() {
+				Hash::SHA256 tmp(reinterpret_cast<char*>(&this->data));
+				return this->hash == tmp;
+			}
+
+			Hash::SHA256 getHash() const noexcept {
+				return this->hash;
+			}
+
+			const T& getValue() const noexcept {
+				return this->data;
+			}
+		};
+	}
+
 	namespace Structures{
 		typedef struct Game {
 			strNameT nameGame;
@@ -80,88 +145,52 @@ namespace Data {
 			}
 		};
 		
-		typedef struct Map {
-			Hash::SHA256 hashSnapshots[MAX_SNAPSHOTS_IN_MAP];
-			strNameT nameSave[MAX_SNAPSHOTS_IN_MAP];
-			std::time_t dateAdded[MAX_SNAPSHOTS_IN_MAP];
-			T_SNAPSHOT_SIZE_IN_MAP occuiped;
+		typedef struct MiniSnapshot {
+			Hash::SHA256 hashSnapshot;
+			strNameT nameSave;
+			std::time_t dateAdded;
 
-			void _COPY(const Map& _ref) {
-				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
-					hashSnapshots[i] = _ref.hashSnapshots[i];
-					MEMNULLCPY(this->nameSave[i], _ref.nameSave[i], sizeof(this->nameSave[0]) / sizeof(CHAR_T));
-					this->dateAdded[i] = _ref.dateAdded[i];
-				}
-				this->occuiped = _ref.occuiped;
+			MiniSnapshot() { _CLEAR(); }
+			MiniSnapshot(const MiniSnapshot& _ref) { _COPY(_ref); }
+			MiniSnapshot(const Snapshot& _ref) {
+				hashSnapshot = _ref.hashSnapshot;
+				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(_ref.nameSave) / sizeof(CHAR_T));
+				this->dateAdded = _ref.dateAdded;
 			}
-
-			void _CLEAR() {
-				for (int i = 0; i < MAX_SNAPSHOTS_IN_MAP; ++i) {
-					hashSnapshots[i].clear();
-					MEMSET(this->nameSave[i], NULL_CHAR, sizeof(this->nameSave[i]) / sizeof(CHAR_T));
-					this->dateAdded[i] = 0;
-				}
-				this->occuiped = 0;
-			}
-		};
-	}
-
-	namespace Form {
-		template<class T>
-		struct Hashable_Data {
-		private:
-			Hash::SHA256 hash;
-			T data;
-
-			void _COPY(const Hashable_Data<T>& _ref) noexcept {
-				this->hash = _ref.hash;
-				this->data = _ref.data;
-			}
-
-			void _CLEAR() noexcept {
-				this->hash.clear();
-				this->data._CLEAR();
-			}
-
-			void _UPDATE_HASH() noexcept{
-				hash = Hash::SHA256(reinterpret_cast<char*>(&data));
-			}
-
-		public:
-			Hashable_Data() {
-				_CLEAR();
-			}
-
-			Hashable_Data(const Hashable_Data<T>& _ref) {
-				_COPY(_ref);
-			}
-
-			Hashable_Data(const T& _ref) {
-				this->data = _ref;
-				_UPDATE_HASH();
-			}
-
-			Hashable_Data<T>& operator=(const Hashable_Data<T>& _ref) {
+			MiniSnapshot& operator=(const MiniSnapshot& _ref) {
 				_COPY(_ref);
 				return *this;
 			}
-			
-			void setValue(const T& _NewData) noexcept {
-				memcpy(&this->data, &_NewData, sizeof(this->data));
-				_UPDATE_HASH();
+			void _COPY(const MiniSnapshot& _ref) {
+				hashSnapshot = _ref.hashSnapshot;
+				MEMNULLCPY(this->nameSave, _ref.nameSave, sizeof(_ref.nameSave) / sizeof(CHAR_T));
+				this->dateAdded = _ref.dateAdded;
 			}
 
-			bool validateValue() {
-				Hash::SHA256 tmp(reinterpret_cast<char*>(&this->data));
-				return this->hash == tmp;
+			void _CLEAR() {
+				hashSnapshot.clear();
+				MEMSET(this->nameSave, NULL_CHAR, sizeof(this->nameSave) / sizeof(CHAR_T));
+				this->dateAdded = 0;
+			}
+		};
+
+		typedef struct Map {
+			Form::Hashable_Data<MiniSnapshot> snapshots[MAX_SNAPSHOTS_IN_MAP];
+			bool mapUsed[MAX_SNAPSHOTS_IN_MAP];
+			Map() { _CLEAR(); }
+			Map(const Map& _ref) { _COPY(_ref); }
+			Map& operator=(const Map& _ref) {
+				_COPY(_ref);
+				return *this;
+			}
+			void _COPY(const Map& _ref) {
+				memcpy(this->snapshots, _ref.snapshots, sizeof(snapshots));
+				memcpy(this->mapUsed, _ref.mapUsed, sizeof(mapUsed));
 			}
 
-			Hash::SHA256 getHash() const noexcept {
-				return this->hash;
-			}
-
-			const T& getValue() const noexcept {
-				return this->data;
+			void _CLEAR() {
+				memset(this->snapshots, 0, sizeof(snapshots));
+				memset(this->mapUsed, 0, sizeof(mapUsed));
 			}
 		};
 	}

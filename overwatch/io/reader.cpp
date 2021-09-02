@@ -2,13 +2,14 @@
 
 Reader::Serializer::Serializer() {
 	this->requestCode = Code::INIT;
+	this->sizeFile = 0;
+	this->currPos = 0;
 }
 
 Reader::Serializer::Serializer(const Filesystem::pathT& pathTarget, const std::streamsize& nPos, const Code& requestCode) {
 	this->path = pathTarget;
 	this->currPos = nPos;
 	this->sizeFile = 0;
-	this->step = 0;
 	this->requestCode = requestCode;
 	this->chIO.exceptions(std::ios::eofbit | std::ios::failbit | std::ios::badbit);
 	try {
@@ -36,24 +37,6 @@ Reader::Serializer::Serializer(const Filesystem::pathT& pathTarget, const std::s
 	}
 }
 
-Reader::Serializer::Serializer(const Filesystem::pathT& pathTarget, const std::streamsize& nPos, const std::streamsize& nStep, const Code& requestCode) {
-	try {
-		this->Serializer::Serializer(pathTarget, nPos, requestCode);
-		this->step = nStep;
-	}
-	catch (const std::ios::failure& e) {
-		throw e;
-	}
-}
-
-void Reader::Serializer::nextPos() noexcept{
-	this->currPos += this->step;
-}
-
-void Reader::Serializer::setStep(const std::streamsize& nStep) noexcept {
-	this->step = nStep;
-}
-
 void Reader::Serializer::readFile(char* buf, const std::streamsize _BufSize) {
 	try {
 		this->openRFile();
@@ -68,7 +51,8 @@ void Reader::Serializer::readFile(char* buf, const std::streamsize _BufSize) {
 
 void Reader::Serializer::writeFile(char* buf, const std::streamsize& _BufSize) {
 	try {
-		this->openWFile();
+		if (this->currPos == 0) this->openWFile();
+		else this->openAFile();
 		this->chIO.seekp(this->currPos);
 		this->chIO.write(buf, _BufSize);
 		this->sizeFile = _BufSize;
@@ -132,7 +116,7 @@ void Reader::Serializer::changeFile(const Filesystem::pathT& newPath) {
 		if (this->requestCode == Code::WRITE)
 			this->requestCode = Code::APPEND;
 
-		this->Serializer::Serializer(newPath, this->currPos, this->step, this->requestCode);
+		this->Serializer::Serializer(newPath, this->currPos, this->requestCode);
 	}
 	catch (std::ios::failure& e) {
 		throw e;
